@@ -61,7 +61,7 @@ const navItems = [
 
   return (
     <div className="w-full hidden  lg:block lg:max-w-[16rem]">
-      <div className="fixed overflow-y-auto h-screen  bg-white  shadow-sm pt-7 shadow-gray-300 lg:max-w-[16rem] w-full">
+      <div className="fixed overflow-y-auto h-screen max-h-[93vh] bg-white  shadow-sm pt-7 shadow-gray-300 lg:max-w-[16rem] w-full">
         <nav className="w-full">
           <ul className="w-full">
             {navItems?.map((item, index) => (
