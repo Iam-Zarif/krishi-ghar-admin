@@ -20,6 +20,9 @@ import { toast, ToastContainer } from "react-toastify";
 
 const WholeSalers = () => {
   const token = localStorage.getItem("token");
+  const [sellerToDelete, setSellerToDelete] = useState(null);
+  const [DeleteConfirmation, setDeleteConfirmation] = useState(false);
+  const [deleteloading, setDeleteLoading] = useState(false);
   const [selectedSortOption, setSelectedSortOption] = useState("Sort By");
   const [approving, setApproving] = useState(false);
   const [sort, setSort] = useState(false);
@@ -144,9 +147,11 @@ const WholeSalers = () => {
     }
   };
 
-  const deleteConfirmationToogle = () => {
-    toast.warning("Delete confirmation modal not implemented.");
-  };
+ const deleteConfirmationToogle = (event, user) => {
+   event.stopPropagation();
+   setSellerToDelete(user);
+   setDeleteConfirmation(true);
+ };
 
   const filteredList =
     activeTab === "Existing WholeSaler" ? existingWholesalers : accountRequests;
@@ -182,11 +187,82 @@ const WholeSalers = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+const handleDelete = async () => {
+  if (!sellerToDelete?._id) return;
 
+  setDeleteLoading(true);
+
+  try {
+    const res = await axios.delete(
+      `${Api}/api/v1/admin/all-wholesaler/${sellerToDelete._id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      },
+    );
+
+    if (res.status === 200) {
+      toast.success("User deleted successfully");
+
+      setExistingWholesalers((prev) =>
+        prev.filter((w) => w._id !== sellerToDelete._id),
+      );
+
+      setAccountRequests((prev) =>
+        prev.filter((w) => w._id !== sellerToDelete._id),
+      );
+
+      setDeleteConfirmation(false);
+      setSellerToDelete(null);
+    }
+  } catch (error) {
+    toast.error("Delete failed");
+  } finally {
+    setDeleteLoading(false);
+  }
+};
   return (
     <div className="w-full p-6 rounded-lg">
       <ToastContainer />
       <div className="flex justify-between items-center">
+        {DeleteConfirmation && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
+            <div className="bg-green-950 p-6 rounded-xl shadow-lg w-96 relative">
+              <button
+                onClick={() => setDeleteConfirmation(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
+              >
+                <RxCross1 />
+              </button>
+
+              <h2 className="text-lg font-semibold text-white">
+                Confirm Deletion
+              </h2>
+
+              <p className="text-gray-300 mt-4 text-sm">
+                Are you sure you want to delete{" "}
+                <strong>{sellerToDelete?.name || "this user"}</strong>? This
+                action cannot be undone.
+              </p>
+
+              <div className="flex justify-end mt-6 gap-3">
+                <button
+                  onClick={() => setDeleteConfirmation(false)}
+                  className="px-4 py-2 border rounded-lg text-gray-200 hover:bg-gray-800"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  {deleteloading ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <h1 className="text-2xl font-bold text-green-700">Wholesalers</h1>
         <p className="bg-white text-sm rounded-2xl px-3 py-1 border border-gray-300">
           Total: {filteredWholesalers.length}
@@ -299,7 +375,7 @@ const WholeSalers = () => {
                       setSelectedWholesalers([]);
                     } else {
                       setSelectedWholesalers(
-                        filteredWholesalers.map((w) => w.id)
+                        filteredWholesalers.map((w) => w.id),
                       );
                     }
                   }}
@@ -395,7 +471,7 @@ const WholeSalers = () => {
                           </li>
                         )}
                         <li
-                          onClick={deleteConfirmationToogle}
+                          onClick={(e) => deleteConfirmationToogle(e, w)}
                           className="cursor-pointer text-red-700 hover:bg-gray-100 px-3 py-1 rounded flex items-center"
                         >
                           <FaMapMarkerAlt className="mr-2" /> Delete User
