@@ -145,7 +145,7 @@ const OrderPage = () => {
                   currentPage === number
                     ? "bg-green-500 text-gray-900"
                     : "bg-gray-100 text-gray-500"
-                }`}
+                } cursor-pointer`}
               >
                 {number}
               </button>

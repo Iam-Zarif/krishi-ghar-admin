@@ -230,7 +230,7 @@ const handleDelete = async () => {
             <div className="bg-green-950 p-6 rounded-xl shadow-lg w-96 relative">
               <button
                 onClick={() => setDeleteConfirmation(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer"
               >
                 <RxCross1 />
               </button>
@@ -248,14 +248,14 @@ const handleDelete = async () => {
               <div className="flex justify-end mt-6 gap-3">
                 <button
                   onClick={() => setDeleteConfirmation(false)}
-                  className="px-4 py-2 border rounded-lg text-gray-200 hover:bg-gray-800"
+                  className="px-4 py-2 border rounded-lg text-gray-200 hover:bg-gray-800 cursor-pointer"
                 >
                   Cancel
                 </button>
 
                 <button
                   onClick={handleDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
                 >
                   {deleteloading ? "Deleting..." : "Delete"}
                 </button>

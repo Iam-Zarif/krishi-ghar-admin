@@ -128,19 +128,19 @@ const ReportPage = () => {
           <div className="mt-6 flex space-x-6">
             <button
               onClick={() => handleSendMessage("In-App Message")}
-              className="bg-blue-600 text-white py-3 px-8 rounded-lg hover:bg-blue-700 transition duration-300 w-full sm:w-auto"
+              className="bg-blue-600 text-white py-3 px-8 rounded-lg hover:bg-blue-700 transition duration-300 w-full sm:w-auto cursor-pointer"
             >
               Send In-App Message
             </button>
             <button
               onClick={() => handleSendMessage("Email")}
-              className="bg-green-600 text-white py-3 px-8 rounded-lg hover:bg-green-700 transition duration-300 w-full sm:w-auto"
+              className="bg-green-600 text-white py-3 px-8 rounded-lg hover:bg-green-700 transition duration-300 w-full sm:w-auto cursor-pointer"
             >
               Send Email
             </button>
             <button
               onClick={() => handleSendMessage("Call")}
-              className="bg-yellow-600 text-white py-3 px-8 rounded-lg hover:bg-yellow-700 transition duration-300 w-full sm:w-auto"
+              className="bg-yellow-600 text-white py-3 px-8 rounded-lg hover:bg-yellow-700 transition duration-300 w-full sm:w-auto cursor-pointer"
             >
               Make a Call
             </button>

@@ -5,7 +5,6 @@ import {
   FaShoppingCart,
   FaDollarSign,
   FaCogs,
-  FaBell,
   FaFileAlt,
   FaUserAlt,
   FaMedal,
@@ -55,7 +54,6 @@ const navItems = [
   {name: "Products" , icon :<MdOutlineProductionQuantityLimits className="text-yellow-700"/>},
   { name: "Partners", icon: <FaUsers className="text-blue-500" /> },
   { name: "Reports", icon: <FaFileAlt className="text-gray-500" /> },
-  { name: "Notifications", icon: <FaBell className="text-orange-500" /> },
   { name: "Settings", icon: <FaCogs className="text-gray-700" /> },
 ];
 

@@ -130,7 +130,7 @@ const Settings = () => {
 
         <button
           type="submit"
-          className="w-full col-span-2 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700"
+          className="w-full col-span-2 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 cursor-pointer"
         >
           Save Information
         </button>

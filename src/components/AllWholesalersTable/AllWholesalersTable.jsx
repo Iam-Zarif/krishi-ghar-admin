@@ -80,7 +80,7 @@ const AllWholesalersTable = ({
             <div className="bg-green-950 p-6 rounded-xl shadow-lg w-96 relative">
               <button
                 onClick={deleteConfirmationToogle}
-                className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+                className="absolute top-4 right-4 text-gray-500 hover:text-red-500 cursor-pointer"
               >
                 <RxCross1 className="w-5 h-5 cursor-pointer" />
               </button>
@@ -169,7 +169,7 @@ const AllWholesalersTable = ({
 
             <td className="mx-auto mt-6  relative flex items-center justify-center">
               <BsThreeDotsVertical
-                className="hover:scale-125 duration-300"
+                className="hover:scale-125 duration-300 cursor-pointer"
                 onClick={(event) => {
                   event.stopPropagation();
                   actionsToogle(wholesaler?._id);
@@ -305,7 +305,7 @@ const AllWholesalersTable = ({
 
             <td className="mx-auto mt-6  relative flex items-center justify-center">
               <BsThreeDotsVertical
-                className="hover:scale-125 duration-300"
+                className="hover:scale-125 duration-300 cursor-pointer"
                 onClick={(event) => {
                   event.stopPropagation();
                   actionsToogle(wholesaler?._id);

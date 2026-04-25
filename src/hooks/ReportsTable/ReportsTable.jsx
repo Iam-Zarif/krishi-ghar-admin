@@ -206,7 +206,7 @@ const ReportsTable = ({ data }) => {
                   <button
                     className={`px-4 py-2 text-center mx-auto rounded-full ${getStatusColor(
                       report.status
-                    )}`}
+                    )} cursor-pointer`}
                   >
                     {report.status}
                   </button>

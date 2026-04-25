@@ -316,7 +316,7 @@ const Consumers = () => {
                       <div className="bg-green-950 p-6 rounded-xl shadow-lg w-96 relative">
                         <button
                           onClick={(e) => deleteConfirmationToogle(e, customer)}
-                          className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+                          className="absolute top-4 right-4 text-gray-500 hover:text-red-500 cursor-pointer"
                         >
                           <RxCross1 className="w-5 h-5 cursor-pointer" />
                         </button>
@@ -391,7 +391,7 @@ const Consumers = () => {
                 <div className="relative ">
                   <td
                     onClick={() => actionToogle(customer?._id)}
-                    className="mx-auto mt-7 hover:scale-125 duration-200 flex items-center justify-center"
+                    className="mx-auto mt-7 hover:scale-125 duration-200 flex items-center justify-center cursor-pointer"
                   >
                     <BsThreeDotsVertical />
                   </td>

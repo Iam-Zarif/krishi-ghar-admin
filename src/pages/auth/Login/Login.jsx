@@ -8,6 +8,7 @@ import "react-phone-input-2/lib/style.css";
 import Cookies from "js-cookie";
 import { Api } from "../../../Api/Api";
 import { AuthContext } from "../../../Context/GetProfile/GetProfile";
+import { getSavedDashboardPath } from "../../../utils/adminSession";
 
 const Login = () => {
   const [phone, setPhone] = useState("");
@@ -21,7 +22,7 @@ const { profile, setProfile } = useContext(AuthContext);
 
  useEffect(() => {
    if (profile) {
-     navigate("/dashboard/dashboard");
+     navigate(getSavedDashboardPath(), { replace: true });
    }
  }, [profile, navigate]);
 
@@ -49,7 +50,7 @@ const { profile, setProfile } = useContext(AuthContext);
         axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
         Cookies.set("token", data.token, { expires: 7 });
         setProfile(data.admin); 
-        navigate("/dashboard/dashboard");
+        navigate(getSavedDashboardPath(), { replace: true });
      
       } else {
         toast.error("Login failed. Please check your credentials.");
@@ -91,7 +92,7 @@ const { profile, setProfile } = useContext(AuthContext);
                 <button
                   className={`font-semibold text-sm bg-yellow-500 py-3 w-full rounded-xl ${
                     otpDisabled ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  } cursor-pointer`}
                   disabled={otpDisabled}
                   onClick={() => {
                     toast.success("OTP Sent: 12345");

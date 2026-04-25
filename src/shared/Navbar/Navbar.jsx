@@ -1,7 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../../public/photos/auth/brandLogo.svg";
-import notification from "../../../public/photos/navbar/Notification.svg";
 import search from "../../../public/photos/navbar/search.png";
 import downarrow from "../../../public/photos/auth/down-arrow.png";
 import blankUser from "../../../public/photos/common/user.png";
@@ -17,7 +16,6 @@ import {
   FaShoppingCart,
   FaDollarSign,
   FaCogs,
-  FaBell,
   FaFileAlt,
   FaUserAlt,
   FaMedal,
@@ -93,7 +91,6 @@ const Navbar = () => {
     { name: "Spends", icon: <FaDollarSign className="text-red-500" /> },
     { name: "Partners", icon: <FaUsers className="text-blue-500" /> },
     { name: "Reports", icon: <FaFileAlt className="text-gray-500" /> },
-    { name: "Notifications", icon: <FaBell className="text-orange-500" /> },
     { name: "Settings", icon: <FaCogs className="text-gray-700" /> },
   ];
 
@@ -130,13 +127,6 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-6 lg:gap-6">
-            <div className="relative hidden lg:block">
-              <div className="absolute -top-1 right-0 px-1 bg-yellow-500 rounded-full text-xs">
-                5
-              </div>
-              <img src={notification} loading="lazy" className="w-6" alt="" />
-            </div>
-
             <div className="relative">
               <div
                 onClick={toogleDropdown}
@@ -178,7 +168,7 @@ const Navbar = () => {
             </div>
 
             <button
-              className="lg:hidden"
+              className="lg:hidden cursor-pointer"
               onClick={() => setMenuOpen(!menuOpen)}
             >
               {menuOpen ? <IoClose size={28} /> : <IoMenu size={28} />}
@@ -189,14 +179,14 @@ const Navbar = () => {
 
       {menuOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-md z-[9999]"
+          className="fixed inset-0 bg-black/30 backdrop-blur-md z-[9999] cursor-pointer"
           onClick={() => setMenuOpen(false)}
         ></div>
       )}
 
       {menuOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-md z-[9999] transition-opacity duration-300"
+          className="fixed inset-0 bg-black/30 backdrop-blur-md z-[9999] transition-opacity duration-300 cursor-pointer"
           onClick={() => setMenuOpen(false)}
         ></div>
       )}
@@ -220,7 +210,7 @@ const Navbar = () => {
               <div
                 onClick={() => setMenuOpen(false)}
                 key={index}
-                className="w-full "
+                className="w-full  cursor-pointer"
               >
                 {item.subItems ? (
                   <div>

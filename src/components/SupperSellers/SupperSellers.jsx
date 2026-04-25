@@ -472,7 +472,7 @@ const removeSeller = (sellerId) => {
                       e.stopPropagation();
                       actionsToogle(seller._id);
                     }}
-                    className="hover:scale-125 duration-200 transition-all"
+                    className="hover:scale-125 duration-200 transition-all cursor-pointer"
                   />
                   {actions[seller._id] && (
                     <div className="absolute top-6 text-sm right-5 bg-gray-100 border border-gray-300 shadow-lg rounded-md w-48 z-[99999]">
@@ -533,7 +533,7 @@ const removeSeller = (sellerId) => {
           <div className="bg-green-950 p-6 rounded-xl shadow-lg w-96 relative">
             <button
               onClick={() => setDeleteConfirmation(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+              className="absolute top-4 right-4 text-gray-500 hover:text-red-500 cursor-pointer"
             >
               <RxCross1 className="w-5 h-5 cursor-pointer" />
             </button>
@@ -548,13 +548,13 @@ const removeSeller = (sellerId) => {
             <div className="flex justify-end mt-6 gap-3">
               <button
                 onClick={() => setDeleteConfirmation(false)}
-                className="px-4 py-2 text-gray-200 border rounded-lg hover:bg-gray-800"
+                className="px-4 py-2 text-gray-200 border rounded-lg hover:bg-gray-800 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
               >
                 {deleteloading ? "Deleting..." : "Delete"}
               </button>

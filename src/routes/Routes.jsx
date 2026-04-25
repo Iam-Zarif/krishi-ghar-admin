@@ -13,7 +13,6 @@ import SuperSellerOrders from "../components/Orders/SuperSellerOrders/SuperSelle
 import Earnings from "../pages/Earnings/Earnings";
 import Spends from "../pages/Spends/Spends";
 import Reports from "../pages/Reports/Reports";
-import Notifications from "../pages/Notifications/Notifications";
 import Settings from "../pages/Settings/Settings";
 import ConsumerPage from "../pages/dynamic/ConsumerPage/ConsumerPage";
 import SuperSellerPage from "../pages/dynamic/SuperSellerPage/SuperSellerPage";
@@ -24,6 +23,7 @@ import ReportPage from "../pages/dynamic/ReportPage/ReportPage";
 import PrivateRoute from "../Context/GetProfile/PrivateRoute";
 import { Api } from "../Api/Api";
 import Products from "../pages/Products/Products";
+import DashboardRouteResolver from "../components/DashboardRouteResolver/DashboardRouteResolver";
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +38,10 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
         children: [
+          {
+            index: true,
+            element: <DashboardRouteResolver />,
+          },
           {
             path: "/dashboard/dashboard",
             element: (
@@ -125,7 +129,6 @@ export const router = createBrowserRouter([
             path: "/dashboard/Reports/:id",
             element: <ReportPage />,
           },
-          { path: "/dashboard/notifications", element: <Notifications /> },
           { path: "/dashboard/settings", element: <Settings /> },
           {path:"/dashboard/products" , element: <Products/>}
         ],

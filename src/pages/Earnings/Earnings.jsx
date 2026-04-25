@@ -288,7 +288,7 @@ const Earnings = () => {
               </tr>
             </tbody>
           </table>
-            <button className="ml-auto mt-3 block text-right px-3 rounded-lg bg-green-500 text-white text-sm py-1.5">Download PDF</button>
+            <button className="ml-auto mt-3 block text-right px-3 rounded-lg bg-green-500 text-white text-sm py-1.5 cursor-pointer">Download PDF</button>
         </div>
     </>
   );
