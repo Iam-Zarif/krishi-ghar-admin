@@ -62,7 +62,7 @@ const OrderPage = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto p-8 bg-white relative rounded-xl shadow-lg mt-2">
-      <Link to="/orders">
+      <Link to="/orders/consumer">
         <IoMdArrowBack width={50} className="w-6 h-6 text-gray-500" />
       </Link>
 

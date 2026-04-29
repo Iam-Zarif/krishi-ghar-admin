@@ -22,7 +22,7 @@ const ProducerPage = () => {
   useEffect(() => {
     if (!producer || !producer._id) {
       toast.error("Producer data not found or invalid.");
-      navigate("/dashboard/Producers");
+      navigate("/producers");
     } else {
       setLoading(false);
       document.title = `${producer?.name || "Producer"} | Krishi Ghar`;
@@ -79,7 +79,7 @@ const ProducerPage = () => {
           }
         );
         setDeleteConfirmation(false);
-        navigate("/dashboard/Producers");
+        navigate("/producers");
       } else {
         toast.error("Unexpected response status. Please try again.");
       }

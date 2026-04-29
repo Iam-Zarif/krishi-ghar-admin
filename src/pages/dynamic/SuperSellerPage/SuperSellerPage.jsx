@@ -139,7 +139,7 @@ const handlePreviousPage = () => {
 
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex flex-col items-start md:w-1/3 gap-y-3">
-          <Link to="/dashboard/supersellers">
+          <Link to="/super-sellers">
             <IoMdArrowBack width={50} className="w-6 h-6" />
           </Link>
           <img

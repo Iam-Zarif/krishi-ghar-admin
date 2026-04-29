@@ -107,7 +107,7 @@ const OrdersTable = ({ data }) => {
           <tbody>
             {currentOrders?.map((order, index) => (
               <tr
-                onClick={() => navigate(`/dashboard/orders/consumer/${order.sn}`)}
+                onClick={() => navigate(`/orders/consumer/${order.sn}`)}
                 key={order.sn}
                 className="hover:bg-gray-200 cursor-pointer border border-gray-400 border-x-0 transition-all"
               >

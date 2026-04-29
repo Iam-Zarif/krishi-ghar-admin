@@ -133,7 +133,7 @@ const Dashboard = () => {
       pending: roleCounts.consumer.pending,
       approved: roleCounts.consumer.approved,
       icon: <FaShoppingCart className="text-green-600 text-3xl" />,
-      route: "/dashboard/consumers",
+      route: "/consumers",
     },
     {
       label: "Super Sellers",
@@ -142,7 +142,7 @@ const Dashboard = () => {
       pending: roleCounts.supersaler.pending,
       approved: roleCounts.supersaler.approved,
       icon: <FaStore className="text-yellow-600 text-3xl" />,
-      route: "/dashboard/super-sellers",
+      route: "/super-sellers",
     },
     {
       label: "Wholesalers",
@@ -151,7 +151,7 @@ const Dashboard = () => {
       pending: roleCounts.wholesaler.pending,
       approved: roleCounts.wholesaler.approved,
       icon: <FaTruck className="text-red-600 text-3xl" />,
-      route: "/dashboard/wholesalers",
+      route: "/wholesalers",
     },
     {
       label: "Producers",
@@ -160,7 +160,7 @@ const Dashboard = () => {
       pending: roleCounts.producer.pending,
       approved: roleCounts.producer.approved,
       icon: <FaUserTie className="text-purple-600 text-3xl" />,
-      route: "/dashboard/producers",
+      route: "/producers",
     },
   ];
 

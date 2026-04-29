@@ -253,7 +253,7 @@ const { id } = useParams();
 
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex flex-col items-start md:w-1/3 gap-y-3">
-          <Link to="/dashboard/consumers">
+          <Link to="/consumers">
             <IoMdArrowBack width={50} className="w-6 h-6" />
           </Link>
           <img

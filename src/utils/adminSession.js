@@ -1,18 +1,30 @@
 export const ADMIN_LAST_DASHBOARD_PATH_KEY = "admin:last-dashboard-path";
 export const ADMIN_PRODUCTS_UI_KEY = "admin:products-ui";
 
+const DEFAULT_ADMIN_PATH = "/";
+
+export const normalizeAdminPath = (path) => {
+  if (!path || path === "/dashboard" || path === "/dashboard/dashboard") {
+    return DEFAULT_ADMIN_PATH;
+  }
+
+  if (path.startsWith("/dashboard/")) {
+    return path.replace(/^\/dashboard/, "") || DEFAULT_ADMIN_PATH;
+  }
+
+  return path;
+};
+
 export const getSavedDashboardPath = () => {
-  if (typeof window === "undefined") return "/dashboard/dashboard";
+  if (typeof window === "undefined") return DEFAULT_ADMIN_PATH;
   const saved = localStorage.getItem(ADMIN_LAST_DASHBOARD_PATH_KEY);
-  return saved && saved.startsWith("/dashboard/")
-    ? saved
-    : "/dashboard/dashboard";
+  return saved ? normalizeAdminPath(saved) : DEFAULT_ADMIN_PATH;
 };
 
 export const saveDashboardPath = (path) => {
   if (typeof window === "undefined") return;
-  if (!path?.startsWith("/dashboard/")) return;
-  localStorage.setItem(ADMIN_LAST_DASHBOARD_PATH_KEY, path);
+  if (!path || path.startsWith("/auth")) return;
+  localStorage.setItem(ADMIN_LAST_DASHBOARD_PATH_KEY, normalizeAdminPath(path));
 };
 
 export const getSavedProductsUi = () => {

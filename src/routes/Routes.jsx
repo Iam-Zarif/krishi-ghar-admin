@@ -1,4 +1,9 @@
-import { createBrowserRouter } from "react-router-dom";
+import {
+  createBrowserRouter,
+  generatePath,
+  Navigate,
+  useParams,
+} from "react-router-dom";
 import App from "../App";
 import Home from "../pages/Home/Home/Home";
 import Login from "../pages/auth/Login/Login";
@@ -23,7 +28,46 @@ import ReportPage from "../pages/dynamic/ReportPage/ReportPage";
 import PrivateRoute from "../Context/GetProfile/PrivateRoute";
 import { Api } from "../Api/Api";
 import Products from "../pages/Products/Products";
-import DashboardRouteResolver from "../components/DashboardRouteResolver/DashboardRouteResolver";
+
+const legacyDashboardRedirects = [
+  ["/dashboard", "/"],
+  ["/dashboard/dashboard", "/"],
+  ["/dashboard/consumers", "/consumers"],
+  ["/dashboard/Consumers", "/consumers"],
+  ["/dashboard/consumers/:id", "/consumers/:id"],
+  ["/dashboard/Consumers/:id", "/consumers/:id"],
+  ["/dashboard/producers", "/producers"],
+  ["/dashboard/Producers", "/producers"],
+  ["/dashboard/producers/:id", "/producers/:id"],
+  ["/dashboard/Producers/:id", "/producers/:id"],
+  ["/dashboard/super-sellers", "/super-sellers"],
+  ["/dashboard/Super-Sellers", "/super-sellers"],
+  ["/dashboard/supersellers", "/super-sellers"],
+  ["/dashboard/super-sellers/:id", "/super-sellers/:id"],
+  ["/dashboard/Super-Sellers/:id", "/super-sellers/:id"],
+  ["/dashboard/supersellers/:id", "/super-sellers/:id"],
+  ["/dashboard/wholesalers", "/wholesalers"],
+  ["/dashboard/WholeSalers", "/wholesalers"],
+  ["/dashboard/WholeSellers", "/wholesalers"],
+  ["/dashboard/wholesalers/:id", "/wholesalers/:id"],
+  ["/dashboard/WholeSalers/:id", "/wholesalers/:id"],
+  ["/dashboard/WholeSellers/:id", "/wholesalers/:id"],
+  ["/dashboard/orders/consumer", "/orders/consumer"],
+  ["/dashboard/orders/consumer/:id", "/orders/consumer/:id"],
+  ["/dashboard/orders/wholesaler", "/orders/wholesaler"],
+  ["/dashboard/orders/superseller", "/orders/superseller"],
+  ["/dashboard/Earnings", "/earnings"],
+  ["/dashboard/Spends", "/spends"],
+  ["/dashboard/Reports", "/reports"],
+  ["/dashboard/Reports/:id", "/reports/:id"],
+  ["/dashboard/settings", "/settings"],
+  ["/dashboard/products", "/products"],
+];
+
+const LegacyRedirect = ({ to }) => {
+  const params = useParams();
+  return <Navigate to={generatePath(to, params)} replace />;
+};
 
 export const router = createBrowserRouter([
   {
@@ -31,7 +75,7 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        path: "/dashboard",
+        path: "/",
         element: (
           <PrivateRoute>
             <Home />
@@ -40,23 +84,18 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <DashboardRouteResolver />,
+            element: <Dashboard />,
           },
           {
-            path: "/dashboard/dashboard",
+            path: "consumers",
             element: (
               <PrivateRoute>
-                {" "}
-                <Dashboard />
+                <Consumers />
               </PrivateRoute>
             ),
           },
           {
-            path: "/dashboard/Consumers",
-            element: <Consumers />,
-          },
-          {
-            path: "/dashboard/Consumers/:id",
+            path: "consumers/:id",
             element: <ConsumerPage />,
             loader: ({ params }) =>
               fetch(`${Api}/api/v1/admin/all-consumer/${params.id}`, {
@@ -67,11 +106,11 @@ export const router = createBrowserRouter([
               }),
           },
           {
-            path: "/dashboard/producers",
+            path: "producers",
             element: <Producers />,
           },
           {
-            path: "/dashboard/Producers/:id",
+            path: "producers/:id",
             element: <ProducerPage />,
             loader: ({ params }) =>
               fetch(`${Api}/api/v1/admin/all-producer/${params.id}`, {
@@ -82,57 +121,61 @@ export const router = createBrowserRouter([
               }),
           },
           {
-            path: "/dashboard/Super-Sellers",
+            path: "super-sellers",
             element: <SupperSellers />,
           },
           {
-            path: "/dashboard/Super-Sellers/:id",
+            path: "super-sellers/:id",
             element: <SuperSellerPage />,
           },
           {
-            path: "/dashboard/WholeSalers",
+            path: "wholesalers",
             element: <WholeSalers />,
           },
           {
-            path: "/dashboard/WholeSalers/:id",
+            path: "wholesalers/:id",
             element: <WholeSellersPage />,
           },
           {
-            path: "/dashboard/orders/consumer",
+            path: "orders/consumer",
             element: <ConsumerOrders />,
           },
           {
-            path: "/dashboard/orders/consumer/:id",
+            path: "orders/consumer/:id",
             element: <OrderPage />,
           },
           {
-            path: "/dashboard/orders/wholesaler",
+            path: "orders/wholesaler",
             element: <WholesalerOrders />,
           },
           {
-            path: "/dashboard/orders/superseller",
+            path: "orders/superseller",
             element: <SuperSellerOrders />,
           },
           {
-            path: "/dashboard/Earnings",
+            path: "earnings",
             element: <Earnings />,
           },
           {
-            path: "/dashboard/Spends",
+            path: "spends",
             element: <Spends />,
           },
           {
-            path: "/dashboard/Reports",
+            path: "reports",
             element: <Reports />,
           },
           {
-            path: "/dashboard/Reports/:id",
+            path: "reports/:id",
             element: <ReportPage />,
           },
-          { path: "/dashboard/settings", element: <Settings /> },
-          {path:"/dashboard/products" , element: <Products/>}
+          { path: "settings", element: <Settings /> },
+          { path: "products", element: <Products /> },
         ],
       },
+      ...legacyDashboardRedirects.map(([from, to]) => ({
+        path: from,
+        element: <LegacyRedirect to={to} />,
+      })),
       {
         path: "/auth/login",
         element: <Login />,

@@ -8,7 +8,7 @@ const Home = () => {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.pathname !== "/dashboard") {
+    if (!location.pathname.startsWith("/auth")) {
       saveDashboardPath(`${location.pathname}${location.search || ""}`);
     }
   }, [location.pathname, location.search]);

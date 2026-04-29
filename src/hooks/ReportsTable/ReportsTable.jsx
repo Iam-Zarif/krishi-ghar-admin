@@ -178,7 +178,7 @@ const ReportsTable = ({ data }) => {
           <tbody>
             {currentReports(activeTab).map((report, index) => (
               <tr
-                onClick={() => navigate(`/dashboard/Reports/${report.sn}`)}
+                onClick={() => navigate(`/reports/${report.sn}`)}
                 key={report.sn}
                 className="hover:bg-gray-200 cursor-pointer border border-gray-400 border-x-0 transition-all"
               >

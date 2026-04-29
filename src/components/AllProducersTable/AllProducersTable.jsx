@@ -194,7 +194,7 @@ const AllProducersTable = ({
                   <ul className="list-none p-2">
                     <li
                       onClick={() =>
-                        navigate(`/dashboard/producers/${producer._id}`)
+                        navigate(`/producers/${producer._id}`)
                       }
                       className="cursor-pointer hover:bg-white p-2 rounded-md flex items-center"
                     >
@@ -343,7 +343,7 @@ const AllProducersTable = ({
                   <ul className="list-none p-2">
                     <li
                       onClick={() =>
-                        navigate(`/dashboard/producers/${producer._id}`)
+                        navigate(`/producers/${producer._id}`)
                       }
                       className="cursor-pointer hover:bg-white p-2 rounded-md flex items-center"
                     >

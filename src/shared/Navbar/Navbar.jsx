@@ -61,11 +61,11 @@ const Navbar = () => {
   }
 
   const navItems = [
-    { name: "Dashboard", icon: <FaTachometerAlt className="text-blue-500" /> },
-    { name: "Consumers", icon: <FaUserAlt className="text-green-500" /> },
-    { name: "Super-Sellers", icon: <FaMedal className="text-yellow-500" /> },
-    { name: "Wholesalers", icon: <FaBox className="text-purple-500" /> },
-    { name: "Producers", icon: <FaSeedling className="text-green-700" /> },
+    { name: "Dashboard", path: "/", icon: <FaTachometerAlt className="text-blue-500" /> },
+    { name: "Consumers", path: "/consumers", icon: <FaUserAlt className="text-green-500" /> },
+    { name: "Super-Sellers", path: "/super-sellers", icon: <FaMedal className="text-yellow-500" /> },
+    { name: "Wholesalers", path: "/wholesalers", icon: <FaBox className="text-purple-500" /> },
+    { name: "Producers", path: "/producers", icon: <FaSeedling className="text-green-700" /> },
     {
       name: "Orders",
       icon: <FaShoppingCart className="text-yellow-500" />,
@@ -73,25 +73,25 @@ const Navbar = () => {
         {
           name: "Consumer Orders",
           icon: <FaRegSmile className="text-green-500" />,
-          link: "/dashboard/orders/consumer",
+          link: "/orders/consumer",
         },
         {
           name: "Super Seller Orders",
           icon: <FaMedal className="text-yellow-500" />,
-          link: "/dashboard/orders/superseller",
+          link: "/orders/superseller",
         },
         {
           name: "Wholesaler Orders",
           icon: <FaBoxes className="text-purple-500" />,
-          link: "/dashboard/orders/wholesaler",
+          link: "/orders/wholesaler",
         },
       ],
     },
-    { name: "Earnings", icon: <FaDollarSign className="text-yellow-500" /> },
-    { name: "Spends", icon: <FaDollarSign className="text-red-500" /> },
-    { name: "Partners", icon: <FaUsers className="text-blue-500" /> },
-    { name: "Reports", icon: <FaFileAlt className="text-gray-500" /> },
-    { name: "Settings", icon: <FaCogs className="text-gray-700" /> },
+    { name: "Earnings", path: "/earnings", icon: <FaDollarSign className="text-yellow-500" /> },
+    { name: "Spends", path: "/spends", icon: <FaDollarSign className="text-red-500" /> },
+    { name: "Partners", path: "/partners", icon: <FaUsers className="text-blue-500" /> },
+    { name: "Reports", path: "/reports", icon: <FaFileAlt className="text-gray-500" /> },
+    { name: "Settings", path: "/settings", icon: <FaCogs className="text-gray-700" /> },
   ];
 
   return (
@@ -257,14 +257,11 @@ const Navbar = () => {
                 ) : (
                   <Link
                     className={`flex items-center w-full px-6 py-4 text-gray-700 hover:bg-green-200 hover:text-green-800 rounded-md cursor-pointer transition-all duration-200 ${
-                      location.pathname ===
-                      `/dashboard/${item.name.toLowerCase().replace(" ", "")}`
+                      location.pathname === item.path
                         ? "bg-green-200 font-bold"
                         : ""
                     }`}
-                    to={`/dashboard/${item.name
-                      .toLowerCase()
-                      .replace(" ", "")}`}
+                    to={item.path}
                   >
                     <span className="mr-3 text-xl">{item.icon}</span>
                     <span>{item.name}</span>
