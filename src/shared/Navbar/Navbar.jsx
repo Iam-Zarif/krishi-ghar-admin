@@ -14,6 +14,7 @@ import {
   FaTachometerAlt,
   FaUsers,
   FaShoppingCart,
+  FaComments,
   FaDollarSign,
   FaCogs,
   FaFileAlt,
@@ -66,6 +67,7 @@ const Navbar = () => {
     { name: "Super-Sellers", path: "/super-sellers", icon: <FaMedal className="text-yellow-500" /> },
     { name: "Wholesalers", path: "/wholesalers", icon: <FaBox className="text-purple-500" /> },
     { name: "Producers", path: "/producers", icon: <FaSeedling className="text-green-700" /> },
+    { name: "Chat", path: "/chat", icon: <FaComments className="text-blue-500" /> },
     {
       name: "Orders",
       icon: <FaShoppingCart className="text-yellow-500" />,

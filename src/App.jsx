@@ -2,6 +2,7 @@ import { useContext, useEffect } from "react";
 import "./App.css";
 import { AuthContext } from "./Context/GetProfile/GetProfile";
 import Navbar from "./shared/Navbar/Navbar";
+import { ChatProvider } from "./Context/ChatContext";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../public/photos/auth/brandLogo.svg";
 
@@ -31,7 +32,9 @@ function App() {
   return (
     <>
       <Navbar />
-      <Outlet />
+      <ChatProvider>
+        <Outlet />
+      </ChatProvider>
     </>
   );
 }

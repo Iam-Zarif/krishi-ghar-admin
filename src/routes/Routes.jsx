@@ -28,6 +28,7 @@ import ReportPage from "../pages/dynamic/ReportPage/ReportPage";
 import PrivateRoute from "../Context/GetProfile/PrivateRoute";
 import { Api } from "../Api/Api";
 import Products from "../pages/Products/Products";
+import ChatPage from "../pages/Chat/ChatPage";
 
 const legacyDashboardRedirects = [
   ["/dashboard", "/"],
@@ -169,6 +170,7 @@ export const router = createBrowserRouter([
             element: <ReportPage />,
           },
           { path: "settings", element: <Settings /> },
+          { path: "chat", element: <ChatPage /> },
           { path: "products", element: <Products /> },
         ],
       },
