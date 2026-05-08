@@ -1,12 +1,9 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../../../public/photos/auth/brandLogo.svg";
-import search from "../../../public/photos/navbar/search.png";
-import downarrow from "../../../public/photos/auth/down-arrow.png";
-import blankUser from "../../../public/photos/common/user.png";
 import { IoMenu, IoClose } from "react-icons/io5";
 import { CiLogout } from "react-icons/ci";
 import { TbLogin2 } from "react-icons/tb";
+import { MdOutlineProductionQuantityLimits } from "react-icons/md";
 
 
 
@@ -28,6 +25,11 @@ import {
   FaChevronDown,
 } from "react-icons/fa";
 import { AuthContext } from "../../Context/GetProfile/GetProfile";
+
+const logo = "/photos/auth/brandLogo.svg";
+const search = "/photos/navbar/search.png";
+const downarrow = "/photos/auth/down-arrow.png";
+const blankUser = "/photos/common/user.png";
 
 const Navbar = () => {
   const location = useLocation();
@@ -91,6 +93,7 @@ const Navbar = () => {
     },
     { name: "Earnings", path: "/earnings", icon: <FaDollarSign className="text-yellow-500" /> },
     { name: "Spends", path: "/spends", icon: <FaDollarSign className="text-red-500" /> },
+    { name: "Products", path: "/products", icon: <MdOutlineProductionQuantityLimits className="text-yellow-700" /> },
     { name: "Partners", path: "/partners", icon: <FaUsers className="text-blue-500" /> },
     { name: "Reports", path: "/reports", icon: <FaFileAlt className="text-gray-500" /> },
     { name: "Settings", path: "/settings", icon: <FaCogs className="text-gray-700" /> },
@@ -101,7 +104,7 @@ const Navbar = () => {
       <div className="fixed top-0 py-3 shadow-sm shadow-gray-300 z-[50] bg-white w-full">
         <div className="flex max-w-[1440px] 2xl:max-w-[1600px] mx-auto items-center justify-between w-full px-4 lg:px-0">
           <div className="flex items-center gap-4 lg:gap-16">
-            <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2">
               <img
                 src={logo}
                 className="w-12"
@@ -112,7 +115,7 @@ const Navbar = () => {
                 <span className="text-green-600">Krishi</span>
                 <span className="text-yellow-500">Ghar</span>
               </p>
-            </div>
+            </Link>
 
             <div className="relative hidden lg:block">
               <img
@@ -181,13 +184,6 @@ const Navbar = () => {
 
       {menuOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-md z-[9999] cursor-pointer"
-          onClick={() => setMenuOpen(false)}
-        ></div>
-      )}
-
-      {menuOpen && (
-        <div
           className="fixed inset-0 bg-black/30 backdrop-blur-md z-[9999] transition-opacity duration-300 cursor-pointer"
           onClick={() => setMenuOpen(false)}
         ></div>
@@ -200,12 +196,14 @@ const Navbar = () => {
         }`}
       >
         <div className="flex flex-col lg:gap-3">
-          <img
-            src={logo}
-            className="w-12 mt-3 ml-3"
-            alt="Brand Logo"
-            loading="lazy"
-          />
+          <Link to="/" onClick={() => setMenuOpen(false)} className="w-fit">
+            <img
+              src={logo}
+              className="w-12 mt-3 ml-3"
+              alt="Brand Logo"
+              loading="lazy"
+            />
+          </Link>
 
           <div className="border-t lg:mt-0 mt-5 border-gray-300">
             {navItems?.map((item, index) => (

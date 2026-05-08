@@ -1,5 +1,4 @@
 import { BsSearch, BsThreeDotsVertical } from "react-icons/bs";
-import blankUser from "../../../public/photos/common/user.png";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { RxCross1 } from "react-icons/rx";
@@ -7,6 +6,8 @@ import { Api } from "../../Api/Api";
 import { FaArrowDown, FaArrowUp, FaEnvelope, FaMapMarkerAlt, FaPhone, FaSort, FaSortAlphaDown, FaSortAlphaUp } from "react-icons/fa";
 import { MdOutlineMessage } from "react-icons/md";
 import { toast, ToastContainer } from "react-toastify";
+
+const blankUser = "/photos/common/user.png";
 
 const Consumers = () => {
   const [searchQuery, setSearchQuery] = useState("");

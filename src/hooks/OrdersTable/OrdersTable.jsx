@@ -11,7 +11,7 @@ const OrdersTable = ({ data }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-
+    setOrders(data || []);
   }, [data]);
 
   const handleSearch = (e) => {
@@ -27,9 +27,16 @@ const OrdersTable = ({ data }) => {
     );
   };
 
-  const filteredOrders = orders.filter((order) =>
-    order.productName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredOrders = orders.filter((order) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+
+    return Object.values(order)
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(query);
+  });
 
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
@@ -67,7 +74,7 @@ const OrdersTable = ({ data }) => {
       <div className="mb-4 mt-5 w-full flex items-center">
         <input
           type="text"
-          placeholder="Search orders..."
+          placeholder="Search by order ID, tracking no, product, date, status..."
           value={searchQuery}
           onChange={handleSearch}
           className="w-full p-3 border-gray-300 border bg-white rounded-lg shadow-sm focus:outline-none focus:outline-green"
@@ -131,7 +138,7 @@ const OrdersTable = ({ data }) => {
                     {order.productName}
                   </div>
                 </td>
-                <p className="p-3 ml-3 teext-center">{order.quantity}</p>
+                <td className="p-3 text-center">{order.quantity}</td>
                 <td className="text-center">{order.totalEarning}</td>
                 <td className="p-3">{order.orderDate}</td>
                 <td className="p-3 mx-auto">

@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import logo from "../../../../public/photos/auth/brandLogo.svg";
 import "react-phone-input-2/lib/style.css";
 import Cookies from "js-cookie";
 import { Api } from "../../../Api/Api";
 import { AuthContext } from "../../../Context/GetProfile/GetProfile";
 import { getSavedDashboardPath } from "../../../utils/adminSession";
+
+const logo = "/photos/auth/brandLogo.svg";
 
 const Login = () => {
   const [phone, setPhone] = useState("");
@@ -22,7 +23,7 @@ const { profile, setProfile } = useContext(AuthContext);
 
  useEffect(() => {
    if (profile) {
-     navigate(getSavedDashboardPath(), { replace: true });
+     navigate("/", { replace: true });
    }
  }, [profile, navigate]);
 

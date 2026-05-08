@@ -4,7 +4,8 @@ import { AuthContext } from "./Context/GetProfile/GetProfile";
 import Navbar from "./shared/Navbar/Navbar";
 import { ChatProvider } from "./Context/ChatContext";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import logo from "../public/photos/auth/brandLogo.svg";
+
+const logo = "/photos/auth/brandLogo.svg";
 
 function App() {
   const navigate = useNavigate();
@@ -16,10 +17,15 @@ function App() {
   useEffect(() => {
     if (loading) return;
 
-    if (!token && !isAuthRoute) {
-      navigate("/auth/login");
+    if (token && profile && isAuthRoute) {
+      navigate("/", { replace: true });
+      return;
     }
-  }, [isAuthRoute, loading, navigate, token]);
+
+    if (!token && !isAuthRoute) {
+      navigate("/auth/login", { replace: true });
+    }
+  }, [isAuthRoute, loading, navigate, profile, token]);
 
   if (loading && token && !isAuthRoute) {
     return (

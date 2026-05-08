@@ -29,6 +29,7 @@ import PrivateRoute from "../Context/GetProfile/PrivateRoute";
 import { Api } from "../Api/Api";
 import Products from "../pages/Products/Products";
 import ChatPage from "../pages/Chat/ChatPage";
+import ErrorPage from "../pages/Error/ErrorPage";
 
 const legacyDashboardRedirects = [
   ["/dashboard", "/"],
@@ -74,6 +75,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "/",
@@ -181,6 +183,10 @@ export const router = createBrowserRouter([
       {
         path: "/auth/login",
         element: <Login />,
+      },
+      {
+        path: "*",
+        element: <ErrorPage />,
       },
     ],
   },

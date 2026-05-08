@@ -8,12 +8,16 @@ const ChatList = ({ chats, selectedChat, onSelectChat, isLoading }) => {
   const { state, setFilter, setSearchQuery, resetFilters } = useContext(ChatContext);
   const [showFilters, setShowFilters] = useState(false);
 
-  const statusOptions = ['all', 'open', 'in-progress', 'resolved', 'closed', 'escalated'];
+  const statusOptions = ['all', 'open', 'in_progress', 'resolved', 'closed', 'escalated'];
   const priorityOptions = ['all', 'low', 'medium', 'high', 'urgent'];
   const categoryOptions = ['all', 'sales', 'support', 'technical', 'billing', 'general', 'complaint', 'feedback'];
   const userTypeOptions = ['all', 'consumer', 'producer', 'wholesaler', 'superseller'];
 
   const filteredChats = chats.filter((chat) => {
+    const lastMessageText =
+      typeof chat.lastMessage === 'string'
+        ? chat.lastMessage
+        : chat.lastMessage?.content || '';
     const matchesStatus = state.filters.status === 'all' || chat.status === state.filters.status;
     const matchesPriority = state.filters.priority === 'all' || chat.priority === state.filters.priority;
     const matchesCategory = state.filters.category === 'all' || chat.category === state.filters.category;
@@ -22,7 +26,7 @@ const ChatList = ({ chats, selectedChat, onSelectChat, isLoading }) => {
       state.searchQuery === '' ||
       chat.subject?.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
       chat.user?.name?.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-      chat.lastMessage?.toLowerCase().includes(state.searchQuery.toLowerCase());
+      lastMessageText.toLowerCase().includes(state.searchQuery.toLowerCase());
 
     return matchesStatus && matchesPriority && matchesCategory && matchesUserType && matchesSearch;
   });
@@ -40,7 +44,7 @@ const ChatList = ({ chats, selectedChat, onSelectChat, isLoading }) => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex h-full min-h-[620px] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
       {/* Search Bar */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
@@ -51,12 +55,12 @@ const ChatList = ({ chats, selectedChat, onSelectChat, isLoading }) => {
               placeholder="Search chats, users, messages..."
               value={state.searchQuery}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="p-2 hover:bg-gray-100 rounded-lg text-gray-700"
+            className="rounded-lg p-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
           >
             <FaFilter size={18} />
           </button>
@@ -70,7 +74,7 @@ const ChatList = ({ chats, selectedChat, onSelectChat, isLoading }) => {
             <h3 className="font-semibold text-gray-700">Filters</h3>
             <button
               onClick={resetFilters}
-              className="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+              className="rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600 cursor-pointer"
             >
               Reset Filters
             </button>
@@ -87,7 +91,7 @@ const ChatList = ({ chats, selectedChat, onSelectChat, isLoading }) => {
               >
                 {statusOptions.map((option) => (
                   <option key={option} value={option}>
-                    {option.charAt(0).toUpperCase() + option.slice(1)}
+                    {option.replace('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())}
                   </option>
                 ))}
               </select>
@@ -162,12 +166,12 @@ const ChatList = ({ chats, selectedChat, onSelectChat, isLoading }) => {
               key={chat._id}
               onClick={() => onSelectChat(chat)}
               className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                selectedChat?._id === chat._id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                selectedChat?._id === chat._id ? 'bg-green-50 border-l-4 border-l-green-500' : ''
               }`}
             >
               <div className="flex items-start gap-3">
                 {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-green-400 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-600 font-semibold text-white">
                   {chat.user?.name?.charAt(0) || 'U'}
                 </div>
 
@@ -175,9 +179,11 @@ const ChatList = ({ chats, selectedChat, onSelectChat, isLoading }) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-gray-800 truncate">{chat.user?.name || 'Unknown'}</h3>
-                    <span className="text-xs text-gray-500">
-                      {new Date(chat.createdAt).toLocaleDateString()}
-                    </span>
+                    {(chat.createdAt || chat.startedAt) && (
+                      <span className="text-xs text-gray-500">
+                        {new Date(chat.createdAt || chat.startedAt).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
 
                   <p className="text-sm text-gray-600 truncate mb-2">{chat.subject || 'No subject'}</p>
@@ -192,7 +198,11 @@ const ChatList = ({ chats, selectedChat, onSelectChat, isLoading }) => {
 
                   {/* Last Message Preview */}
                   {chat.lastMessage && (
-                    <p className="text-xs text-gray-500 mt-2 truncate">{chat.lastMessage}</p>
+                    <p className="text-xs text-gray-500 mt-2 truncate">
+                      {typeof chat.lastMessage === 'string'
+                        ? chat.lastMessage
+                        : chat.lastMessage?.content}
+                    </p>
                   )}
                 </div>
 

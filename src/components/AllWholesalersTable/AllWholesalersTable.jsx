@@ -3,13 +3,14 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaEnvelope, FaMapMarkerAlt, FaPhone } from "react-icons/fa";
 import { IoCheckmarkDoneCircle } from "react-icons/io5";
 import { MdOutlineMessage } from "react-icons/md";
-import blankUser from "../../../public/photos/common/user.png";
 import { useState } from "react";
 
 import { RxCross1 } from "react-icons/rx";
 import { toast } from "react-toastify";
 import { Api } from "../../Api/Api";
 import axios from "axios";
+
+const blankUser = "/photos/common/user.png";
 const AllWholesalersTable = ({
   wholesaler,
   activeTab,

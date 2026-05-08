@@ -2,8 +2,9 @@ import { BsSearch, BsThreeDotsVertical } from "react-icons/bs";
 import { useState, useEffect, useRef } from "react";
 import { RxCross1 } from "react-icons/rx";
 import axios from "axios";
-import blankUser from "../../../public/photos/common/user.png";
 import { Api } from "../../Api/Api";
+
+const blankUser = "/photos/common/user.png";
 import {
   FaArrowDown,
   FaArrowUp,

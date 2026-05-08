@@ -12,8 +12,11 @@ const ChatPageContent = () => {
   const loadChats = async () => {
     setIsLoading(true);
     try {
-      const response = await chatAPI.getAllChats();
-      const chats = response.data?.chats || [];
+      const response = await chatAPI.getAllChats({
+        ...state.filters,
+        search: state.searchQuery,
+      });
+      const chats = response.data?.data?.chats || response.data?.chats || [];
       setChats(chats);
       if (!state.selectedChat && chats.length > 0) {
         setSelectedChat(chats[0]);
@@ -36,7 +39,7 @@ const ChatPageContent = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 pt-28 bg-gray-100">
+    <div className="min-h-screen bg-gray-100 p-4 pt-2">
       <div className="max-w-[1440px] mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-semibold text-gray-900">Chat Management</h1>
@@ -45,7 +48,7 @@ const ChatPageContent = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[360px_minmax(0,1fr)] gap-4">
+        <div className="grid h-[calc(100vh-11rem)] min-h-[620px] grid-cols-1 gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
           <ChatList
             chats={state.chats}
             selectedChat={state.selectedChat}

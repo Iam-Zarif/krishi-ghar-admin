@@ -5,6 +5,7 @@ import { FaSort } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import {
   approveAdminProduct,
+  fetchAdminSellPosts,
   fetchAdminProductDetails,
   fetchAdminProductsByStatus,
   rejectAdminProduct,
@@ -50,14 +51,16 @@ const statusLabelMap = {
   pending: "অপেক্ষমাণ",
   approved: "অনুমোদিত",
   rejected: "বাতিল",
+  active: "সক্রিয়",
+  inactive: "নিষ্ক্রিয়",
 };
 
 const StatusBadge = ({ status }) => {
   const value = String(status || "pending").toLowerCase();
   const className =
-    value === "approved"
+    value === "approved" || value === "active"
       ? "bg-green-100 text-green-700"
-      : value === "rejected"
+      : value === "rejected" || value === "inactive"
         ? "bg-red-100 text-red-700"
         : "bg-yellow-100 text-yellow-700";
 
@@ -248,6 +251,30 @@ const ProductDetailsModal = ({ product, loading, onClose, onApprove, onReject, a
                   <p className="text-sm text-gray-500">সেল পোস্ট</p>
                   <p className="mt-2 text-lg font-semibold text-gray-800">{product.safeSellPost ? "হ্যাঁ" : "না"}</p>
                 </div>
+                {product.ownerRole === "sell-post" && (
+                  <>
+                    <div className="rounded-lg bg-gray-50 p-4">
+                      <p className="text-sm text-gray-500">বিক্রয় ধরন</p>
+                      <p className="mt-2 text-lg font-semibold capitalize text-gray-800">{product.sellType}</p>
+                    </div>
+                    <div className="rounded-lg bg-gray-50 p-4">
+                      <p className="text-sm text-gray-500">অবশিষ্ট</p>
+                      <p className="mt-2 text-lg font-semibold text-gray-800">
+                        {product.remainingQuantity ?? 0} {product.unit || ""}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-gray-50 p-4">
+                      <p className="text-sm text-gray-500">কমিশন</p>
+                      <p className="mt-2 text-lg font-semibold text-gray-800">
+                        {product.commissionPercent || 0}% / {formatMoney(product.totalCommission)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-gray-50 p-4">
+                      <p className="text-sm text-gray-500">দৃশ্যমানতা</p>
+                      <p className="mt-2 text-lg font-semibold capitalize text-gray-800">{product.visibility}</p>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="rounded-lg bg-gray-50 p-4">
@@ -278,6 +305,7 @@ const ProductDetailsModal = ({ product, loading, onClose, onApprove, onReject, a
                 </div>
               </div>
 
+              {product.ownerRole !== "sell-post" && (
               <div className="flex flex-wrap justify-end gap-3">
                 {product.safeStatus !== "approved" && (
                   <button
@@ -300,6 +328,7 @@ const ProductDetailsModal = ({ product, loading, onClose, onApprove, onReject, a
                   </button>
                 )}
               </div>
+              )}
             </div>
           </div>
         </div>
@@ -317,6 +346,7 @@ const Products = () => {
     approved: [],
     rejected: [],
   });
+  const [sellPosts, setSellPosts] = useState([]);
   const [search, setSearch] = useState(savedUi.search);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOption, setSortOption] = useState(savedUi.sort);
@@ -333,6 +363,7 @@ const Products = () => {
   const [confirmState, setConfirmState] = useState(null);
   const dropdownRef = useRef(null);
   const itemsPerPage = 10;
+  const canModerateProducts = true;
 
   const loadProducts = async () => {
     if (!token) {
@@ -352,6 +383,14 @@ const Products = () => {
       ]);
 
       setStatusBuckets({ all, pending, approved, rejected });
+
+      try {
+        const nextSellPosts = await fetchAdminSellPosts({ token });
+        setSellPosts(nextSellPosts);
+      } catch (sellPostError) {
+        console.warn("Admin sell posts could not be loaded", sellPostError);
+        setSellPosts([]);
+      }
     } catch (requestError) {
       const message =
         requestError?.response?.data?.message ||
@@ -384,11 +423,7 @@ const Products = () => {
     setCurrentPage(1);
   }, [search, sortOption, activeRole, activeStatus]);
 
-  useEffect(() => {
-    if (activeRole !== "producer" && activeStatus !== "all") {
-      setActiveStatus("all");
-    }
-  }, [activeRole, activeStatus]);
+
 
   useEffect(() => {
     saveProductsUi({
@@ -415,30 +450,32 @@ const Products = () => {
   const roleCounts = useMemo(
     () =>
       ROLE_TABS.reduce((acc, tab) => {
-        acc[tab.key] = activeStatusProducts.filter((product) => product.ownerRole === tab.key).length;
+        acc[tab.key] =
+          tab.key === "sell-post"
+            ? sellPosts.length
+            : activeStatusProducts.filter((product) => product.ownerRole === tab.key).length;
         return acc;
       }, {}),
-    [activeStatusProducts],
+    [activeStatusProducts, sellPosts],
   );
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
-    let next = activeStatusProducts.filter((product) => product.ownerRole === activeRole);
+    let next =
+      activeRole === "sell-post"
+        ? sellPosts
+        : activeStatusProducts.filter((product) => product.ownerRole === activeRole);
 
     if (query) {
       next = next.filter((product) => {
-        const haystack = [
-          product.safeName,
-          product.safeCategory,
-          product.description,
-          product.ownerInfo?.name,
-          product.ownerInfo?.phone,
-          product.ownerInfo?.email,
-          product.safeStatus,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+        const collectValues = (value) => {
+          if (value === null || value === undefined) return [];
+          if (typeof value !== "object") return [String(value)];
+          if (Array.isArray(value)) return value.flatMap(collectValues);
+          return Object.values(value).flatMap(collectValues);
+        };
+
+        const haystack = collectValues(product).join(" ").toLowerCase();
 
         return haystack.includes(query);
       });
@@ -468,7 +505,7 @@ const Products = () => {
     }
 
     return sorted;
-  }, [activeRole, activeStatusProducts, search, sortOption]);
+  }, [activeRole, activeStatusProducts, search, sellPosts, sortOption]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
   const paginatedItems = filteredProducts.slice(
@@ -502,6 +539,14 @@ const Products = () => {
   };
 
   const handleOpenDetails = async (productId) => {
+    if (activeRole === "sell-post") {
+      const selectedPost = sellPosts.find((post) => post._id === productId);
+      setDetailsProduct(selectedPost || null);
+      setDetailsOpen(true);
+      setOpenDropdownId(null);
+      return;
+    }
+
     try {
       setDetailsOpen(true);
       setDetailsLoading(true);
@@ -801,7 +846,7 @@ const Products = () => {
                         >
                           বিস্তারিত
                         </button>
-                        {product.safeStatus !== "approved" && (
+                        {canModerateProducts && product.safeStatus !== "approved" && (
                           <button
                             type="button"
                             onClick={() => handleApprove(product._id)}
@@ -810,7 +855,7 @@ const Products = () => {
                             অনুমোদন
                           </button>
                         )}
-                        {product.safeStatus !== "rejected" && (
+                        {canModerateProducts && product.safeStatus !== "rejected" && (
                           <button
                             type="button"
                             onClick={() => requestRejectConfirmation(product)}
@@ -845,7 +890,7 @@ const Products = () => {
                   </div>
                 </div>
 
-                {product.safeStatus === "pending" && (
+                {canModerateProducts && product.safeStatus === "pending" && (
                   <div className="mt-3 lg:hidden">
                     <InlineActionButtons
                       product={product}
@@ -870,12 +915,14 @@ const Products = () => {
               </div>
 
               <div className="hidden items-center justify-between gap-3 lg:flex">
-                <InlineActionButtons
-                  product={product}
-                  onApprove={handleApprove}
-                  onReject={() => requestRejectConfirmation(product)}
-                  actionLoading={actionLoadingId}
-                />
+                {canModerateProducts && (
+                  <InlineActionButtons
+                    product={product}
+                    onApprove={handleApprove}
+                    onReject={() => requestRejectConfirmation(product)}
+                    actionLoading={actionLoadingId}
+                  />
+                )}
 
                 <div
                   className="relative ml-auto"
@@ -896,7 +943,7 @@ const Products = () => {
                       >
                       বিস্তারিত
                       </button>
-                      {product.safeStatus !== "approved" && (
+                      {canModerateProducts && product.safeStatus !== "approved" && (
                         <button
                           type="button"
                           onClick={() => handleApprove(product._id)}
@@ -905,7 +952,7 @@ const Products = () => {
                           অনুমোদন
                         </button>
                       )}
-                      {product.safeStatus !== "rejected" && (
+                      {canModerateProducts && product.safeStatus !== "rejected" && (
                         <button
                           type="button"
                           onClick={() => requestRejectConfirmation(product)}

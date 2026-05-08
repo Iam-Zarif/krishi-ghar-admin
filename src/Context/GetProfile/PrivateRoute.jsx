@@ -1,11 +1,12 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "./GetProfile";
-import logo from "../../../public/photos/auth/brandLogo.svg";
+
+const logo = "/photos/auth/brandLogo.svg";
 
 // eslint-disable-next-line react/prop-types
 const PrivateRoute = ({ children }) => {
-  const { profile, loading } = useContext(AuthContext);
+  const { loading } = useContext(AuthContext);
   const token = localStorage.getItem("token");
 
   

@@ -1,140 +1,232 @@
+import { useContext, useEffect, useState } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import { FaCamera, FaKey, FaSave, FaUserCog } from "react-icons/fa";
+import { Api } from "../../Api/Api";
+import { AuthContext } from "../../Context/GetProfile/GetProfile";
 
+const blankUser = "/photos/common/user.png";
+
+const emptyProfileForm = {
+  name: "",
+  email: "",
+  phone: "",
+  nid: "",
+  division: "",
+  district: "",
+  thana: "",
+  address: "",
+};
 
 const Settings = () => {
+  const { profile, setProfile } = useContext(AuthContext);
+  const token = localStorage.getItem("token");
+  const [form, setForm] = useState(emptyProfileForm);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: "",
+    newPassword: "",
+  });
 
+  useEffect(() => {
+    if (!profile) return;
 
+    setForm({
+      name: profile.name || "",
+      email: profile.email || "",
+      phone: profile.phone || "",
+      nid: profile.nid || "",
+      division: profile.division || "",
+      district: profile.district || "",
+      thana: profile.thana || "",
+      address: profile.address || "",
+    });
+    setImagePreview(profile.image || "");
+  }, [profile]);
 
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleProfileSubmit = async (event) => {
+    event.preventDefault();
+    if (!token) {
+      toast.error("Unauthorized access");
+      return;
+    }
+
+    const payload = new FormData();
+    Object.entries(form).forEach(([key, value]) => {
+      if (value) payload.append(key, value);
+    });
+    if (image) payload.append("image", image);
+
+    try {
+      setSavingProfile(true);
+      const response = await axios.put(`${Api}/api/v1/admin/profile`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+      setProfile(response.data?.admin || profile);
+      setImage(null);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Profile update failed");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (event) => {
+    event.preventDefault();
+    if (!passwordForm.oldPassword || !passwordForm.newPassword) {
+      toast.error("Both password fields are required");
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+      await axios.put(`${Api}/api/v1/admin/change-password`, passwordForm, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+      setPasswordForm({ oldPassword: "", newPassword: "" });
+      toast.success("Password changed successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Password change failed");
+    } finally {
+      setSavingPassword(false);
+    }
+  };
 
   return (
-    <div className="p-8 lg:w-[50rem] mx-auto col-span-6 shadow-xl rounded-xl   mt-2 bg-white border-t-4 border-green-500">
-      <h2 className="text-3xl font-semibold text-center mb-10 text-gray-800">
-        Super Admin Settings
-      </h2>
-      <form className="space-y-6 grid lg:grid-cols-2 gap-x-6">
-        <div className="flex flex-col">
-          <label htmlFor="fullName" className="mb-2 font-semibold">
-            Full Name
-          </label>
-          <input
-            type="text"
-            id="fullName"
-            name="fullName"
-            className="border border-gray-300 rounded-lg p-3 w-full outline-none"
-            placeholder="Full Name"
-          />
+    <div className="w-full p-6 text-gray-800">
+      <ToastContainer />
+      <div className="mx-auto max-w-5xl space-y-6">
+        <div className="rounded-lg bg-white px-6 py-5 shadow-md">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-green-100 p-3 text-green-700">
+              <FaUserCog />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Admin Settings</h1>
+              <p className="text-sm text-gray-500">Update your admin profile and password.</p>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col">
-          <label htmlFor="birthdate" className="mb-2 font-semibold">
-            Birthdate
-          </label>
-          <input
-            type="date"
-            id="birthdate"
-            name="birthdate"
-            className="border border-gray-300 rounded-lg p-3 w-full outline-none"
-            placeholder="Birthdate"
-          />
-        </div>
+        <form onSubmit={handleProfileSubmit} className="rounded-lg bg-white p-6 shadow-md">
+          <div className="flex flex-col gap-6 lg:flex-row">
+            <div className="flex flex-col items-center lg:w-56">
+              <img
+                src={imagePreview || blankUser}
+                alt="Admin profile"
+                className="h-32 w-32 rounded-full border-4 border-green-100 object-cover"
+              />
+              <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                <FaCamera className="text-green-600" />
+                Change Photo
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+              </label>
+            </div>
 
-        <div className="flex flex-col">
-          <label htmlFor="nid" className="mb-2 font-semibold">
-            NID Number
-          </label>
-          <input
-            type="text"
-            id="nid"
-            name="nid"
-            className="border border-gray-300 rounded-lg p-3 w-full outline-none"
-            placeholder="NID Number"
-          />
-        </div>
+            <div className="grid flex-1 gap-4 md:grid-cols-2">
+              {[
+                ["name", "Full Name"],
+                ["phone", "Phone Number"],
+                ["email", "Email"],
+                ["nid", "NID Number"],
+                ["division", "Division"],
+                ["district", "District"],
+                ["thana", "Thana"],
+                ["address", "Address"],
+              ].map(([name, label]) => (
+                <div key={name} className={name === "address" ? "md:col-span-2" : ""}>
+                  <label htmlFor={name} className="mb-2 block text-sm font-semibold text-gray-700">
+                    {label}
+                  </label>
+                  <input
+                    id={name}
+                    name={name}
+                    type={name === "email" ? "email" : "text"}
+                    value={form[name]}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border border-gray-300 bg-white p-3 outline-none focus:border-green-500"
+                    placeholder={label}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <div className="flex flex-col">
-          <label htmlFor="phone" className="mb-2 font-semibold">
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            className="border border-gray-300 rounded-lg p-3 w-full outline-none"
-            placeholder="Phone Number"
-          />
-        </div>
+          <div className="mt-6 flex justify-end">
+            <button
+              type="submit"
+              disabled={savingProfile}
+              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-green-300 cursor-pointer"
+            >
+              <FaSave />
+              {savingProfile ? "Saving..." : "Save Profile"}
+            </button>
+          </div>
+        </form>
 
-        <div className="flex flex-col">
-          <label htmlFor="email" className="mb-2 font-semibold">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            className="border border-gray-300 rounded-lg p-3 w-full outline-none"
-            placeholder="Email"
-          />
-        </div>
+        <form onSubmit={handlePasswordSubmit} className="rounded-lg bg-white p-6 shadow-md">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="rounded-lg bg-yellow-100 p-3 text-yellow-700">
+              <FaKey />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">Change Password</h2>
+              <p className="text-sm text-gray-500">Use a new password that differs from the old one.</p>
+            </div>
+          </div>
 
-        <div className="flex flex-col">
-          <label htmlFor="permanentAddress" className="mb-2 font-semibold">
-            Permanent Address
-          </label>
-          <input
-            type="text"
-            id="permanentAddress"
-            name="permanentAddress"
-            className="border border-gray-300 rounded-lg p-3 w-full outline-none"
-            placeholder="Permanent Address"
-          />
-        </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <input
+              type="password"
+              value={passwordForm.oldPassword}
+              onChange={(event) =>
+                setPasswordForm((prev) => ({ ...prev, oldPassword: event.target.value }))
+              }
+              placeholder="Old password"
+              className="w-full rounded-lg border border-gray-300 bg-white p-3 outline-none focus:border-green-500"
+            />
+            <input
+              type="password"
+              value={passwordForm.newPassword}
+              onChange={(event) =>
+                setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))
+              }
+              placeholder="New password"
+              className="w-full rounded-lg border border-gray-300 bg-white p-3 outline-none focus:border-green-500"
+            />
+          </div>
 
-        <div className="flex flex-col">
-          <label htmlFor="presentAddress" className="mb-2 font-semibold">
-            Present Address
-          </label>
-          <input
-            type="text"
-            id="presentAddress"
-            name="presentAddress"
-            className="border border-gray-300 rounded-lg p-3 w-full outline-none"
-            placeholder="Present Address"
-          />
-        </div>
-
-        <div className="flex flex-col">
-          <label htmlFor="profession" className="mb-2 font-semibold">
-            Profession
-          </label>
-          <input
-            type="text"
-            id="profession"
-            name="profession"
-            className="border border-gray-300 rounded-lg p-3 w-full outline-none"
-            placeholder="Profession"
-          />
-        </div>
-
-        <div className="flex col-span-2 flex-col">
-          <label htmlFor="declaration" className="mb-2 font-semibold">
-            Declaration (প্রতিষ্ঠানের ভূমিকা ও দায়বদ্ধতা)
-          </label>
-          <textarea
-            id="declaration"
-            name="declaration"
-            rows="4"
-            className="border w-full border-gray-300 rounded-lg p-3 w-full outline-none"
-            placeholder="Write your declaration..."
-          ></textarea>
-        </div>
-
-        <button
-          type="submit"
-          className="w-full col-span-2 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 cursor-pointer"
-        >
-          Save Information
-        </button>
-      </form>
+          <div className="mt-6 flex justify-end">
+            <button
+              type="submit"
+              disabled={savingPassword}
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-800 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-900 disabled:cursor-not-allowed disabled:bg-gray-400 cursor-pointer"
+            >
+              <FaKey />
+              {savingPassword ? "Updating..." : "Update Password"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -8,13 +8,14 @@ import {
 } from "react-icons/fa";
 import { IoCheckmarkDoneCircle } from "react-icons/io5";
 import { MdOutlineMessage } from "react-icons/md";
-import blankUser from "../../../public/photos/common/user.png";
 import { useState } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { toast } from "react-toastify";
 import { Api } from "../../Api/Api";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
+const blankUser = "/photos/common/user.png";
 const AllProducersTable = ({
   producer,
   activeTab,

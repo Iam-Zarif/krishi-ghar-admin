@@ -26,8 +26,7 @@ const AuthProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
-        console.log("Admin Profile:", response.data);
-        setProfile(response.data);
+        setProfile(response.data?.admin || response.data);
       } catch (err) {
         console.error(
           "Error fetching profile:",
@@ -48,10 +47,14 @@ const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post(`${Api}/api/v1/logout`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      await axios.post(
+        `${Api}/api/v1/logout`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        },
+      );
       localStorage.removeItem("token");
       Cookies.remove("token");
       Cookies.remove("session");

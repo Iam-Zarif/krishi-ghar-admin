@@ -47,7 +47,20 @@ const ChatDashboard = () => {
     try {
       setIsLoading(true);
       const response = await chatAPI.getStatistics();
-      setStats(response.data);
+      const chatStats = response.data?.data?.chats || {};
+      setStats({
+        totalActive: chatStats.totalChats || 0,
+        averageResponseTime: chatStats.averageResponseTime || 0,
+        resolved: chatStats.resolvedChats || 0,
+        unresolved: (chatStats.openChats || 0) + (chatStats.inProgressChats || 0),
+        todayVolume: response.data?.data?.todayVolume || 0,
+        byStatus: {
+          open: chatStats.openChats || 0,
+          in_progress: chatStats.inProgressChats || 0,
+          resolved: chatStats.resolvedChats || 0,
+          closed: chatStats.closedChats || 0,
+        },
+      });
     } catch (error) {
       console.error('Failed to load statistics:', error);
       toast.error('Failed to load statistics');
@@ -125,7 +138,9 @@ const ChatDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
             {Object.entries(stats.byStatus).map(([status, count]) => (
               <div key={status} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <p className="text-sm text-gray-600 font-medium capitalize">{status}</p>
+                <p className="text-sm text-gray-600 font-medium capitalize">
+                  {status.replace('_', ' ')}
+                </p>
                 <p className="text-2xl font-bold text-gray-800 mt-2">{count}</p>
               </div>
             ))}

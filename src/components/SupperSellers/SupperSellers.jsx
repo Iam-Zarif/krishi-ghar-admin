@@ -3,11 +3,12 @@ import { useState, useEffect } from "react";
 import { FaArrowDown, FaArrowUp, FaEnvelope, FaMapMarkerAlt, FaPhone, FaSort, FaSortAlphaDown, FaSortAlphaUp } from "react-icons/fa";
 import { MdOutlineMessage } from "react-icons/md";
 import { IoCheckmarkDoneCircle } from "react-icons/io5";
-import blankUser from "../../../public/photos/common/user.png";
 import { RxCross1 } from "react-icons/rx";
 import axios from "axios";
 import { Api } from "../../Api/Api";
 import { toast, ToastContainer } from "react-toastify";
+
+const blankUser = "/photos/common/user.png";
 
 const SupperSellers = () => {
   const token = localStorage.getItem("token");

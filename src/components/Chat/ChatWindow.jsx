@@ -1,13 +1,10 @@
 import { useContext, useState, useRef, useEffect } from 'react';
 import { ChatContext } from '../../Context/ChatContext';
 import {
-  FaPaperclip,
-  FaSmile,
-  FaChevronDown,
   FaEllipsisV,
   FaArrowLeft,
   FaCheckDouble,
-  FaTimes,
+  FaPaperPlane,
 } from 'react-icons/fa';
 import StatusBadge from './StatusBadge';
 import LoadingSpinner from './LoadingSpinner';
@@ -21,6 +18,10 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
   const [showActions, setShowActions] = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const messagesEndRef = useRef(null);
+  const statusLabel = (value) =>
+    String(value || '').replace('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const isAdminMessage = (msg) =>
+    msg.senderRole === 'admin' || msg.sender?.role === 'admin' || msg.senderType === 'admin';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -40,7 +41,7 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
     try {
       setIsLoading(true);
       const response = await chatAPI.getChatMessages(chat._id);
-      setMessages(response.data.messages || []);
+      setMessages(response.data?.data?.messages || response.data?.messages || []);
     } catch (error) {
       console.error('Failed to load messages:', error);
       toast.error('Failed to load messages');
@@ -57,9 +58,10 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
       setIsLoading(true);
       const response = await chatAPI.sendMessage(chat._id, {
         content: messageText,
-        type: 'text',
+        messageType: 'text',
       });
-      addMessage(response.data.message);
+      const nextMessage = response.data?.data || response.data?.message;
+      if (nextMessage) addMessage(nextMessage);
       setMessageText('');
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -71,7 +73,7 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
 
   const handleStatusChange = async (newStatus) => {
     try {
-      if (newStatus === 'in-progress') {
+      if (newStatus === 'in_progress') {
         await chatAPI.markInProgress(chat._id);
       } else if (newStatus === 'resolved') {
         await chatAPI.resolveChat(chat._id);
@@ -82,7 +84,7 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
       }
       updateChatStatus(chat._id, newStatus);
       setShowStatusMenu(false);
-      toast.success(`Chat marked as ${newStatus}`);
+      toast.success(`Chat marked as ${statusLabel(newStatus)}`);
     } catch (error) {
       console.error('Failed to update status:', error);
       toast.error('Failed to update status');
@@ -102,8 +104,8 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
 
   if (!chat) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-50">
-        <p className="text-gray-400">Select a chat to start</p>
+      <div className="flex h-full min-h-[620px] items-center justify-center rounded-lg border border-dashed border-gray-300 bg-white">
+        <p className="text-sm text-gray-400">Select a chat to start</p>
       </div>
     );
   }
@@ -111,9 +113,9 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
   const messages = state.messages || [];
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex h-full min-h-[620px] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+      <div className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
         <div className="flex items-center gap-3 flex-1">
           <button
             onClick={onBack}
@@ -122,7 +124,7 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
             <FaArrowLeft />
           </button>
 
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-green-400 flex items-center justify-center text-white font-semibold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 text-white font-semibold">
             {chat.user?.name?.charAt(0) || 'U'}
           </div>
 
@@ -136,15 +138,15 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
         <div className="flex items-center gap-2 relative">
           <button
             onClick={() => setShowStatusMenu(!showStatusMenu)}
-            className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition"
+            className="rounded-lg bg-green-50 px-3 py-1 text-sm font-medium text-green-700 transition hover:bg-green-100 cursor-pointer"
           >
-            Status: {chat.status}
+            {statusLabel(chat.status)}
           </button>
 
           {showStatusMenu && (
-            <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+            <div className="absolute right-0 top-full z-10 mt-1 w-44 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
               <button
-                onClick={() => handleStatusChange('in-progress')}
+                onClick={() => handleStatusChange('in_progress')}
                 className="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700"
               >
                 Mark In Progress
@@ -172,7 +174,7 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
 
           <button
             onClick={() => setShowActions(!showActions)}
-            className="p-2 hover:bg-gray-100 rounded-lg text-gray-700"
+            className="rounded-lg p-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
           >
             <FaEllipsisV />
           </button>
@@ -198,7 +200,7 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
       </div>
 
       {/* Chat Info Bar */}
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-3 items-center">
+      <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3">
         <div className="text-sm">
           <span className="text-gray-600">Category: </span>
           <span className="font-semibold text-gray-800">{chat.category}</span>
@@ -209,9 +211,11 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
         </div>
         <div className="text-sm">
           <span className="text-gray-600">Created: </span>
-          <span className="font-semibold text-gray-800">
-            {new Date(chat.createdAt).toLocaleDateString()}
-          </span>
+          {(chat.createdAt || chat.startedAt) && (
+            <span className="font-semibold text-gray-800">
+              {new Date(chat.createdAt || chat.startedAt).toLocaleDateString()}
+            </span>
+          )}
         </div>
         {chat.subject && (
           <div className="text-sm w-full">
@@ -222,7 +226,7 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 bg-white">
+      <div className="flex-1 overflow-y-auto bg-[#f7f9f6] px-4 py-5">
         {isLoading ? (
           <LoadingSpinner />
         ) : messages.length === 0 ? (
@@ -231,54 +235,61 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((msg) => (
-              <div
-                key={msg._id}
-                className={`flex ${msg.senderType === 'admin' ? 'justify-end' : 'justify-start'}`}
-              >
+            {messages.map((msg) => {
+              const adminMessage = isAdminMessage(msg);
+              const systemMessage = msg.messageType === 'system' || msg.isSystemMessage;
+              const content = msg.content || msg.text || 'Message unavailable';
+
+              if (systemMessage) {
+                return (
+                  <div key={msg._id} className="flex justify-center">
+                    <span className="max-w-[80%] rounded-full bg-white px-3 py-1 text-center text-xs text-gray-500 shadow-sm">
+                      {content}
+                    </span>
+                  </div>
+                );
+              }
+
+              return (
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                    msg.senderType === 'admin'
-                      ? 'bg-blue-500 text-white rounded-br-none'
-                      : 'bg-gray-100 text-gray-800 rounded-bl-none'
-                  }`}
+                  key={msg._id}
+                  className={`flex ${adminMessage ? 'justify-end' : 'justify-start'}`}
                 >
-                  <p className="text-sm break-words">{msg.content}</p>
-                  <p className={`text-xs mt-1 ${
-                    msg.senderType === 'admin' ? 'text-blue-100' : 'text-gray-500'
-                  }`}>
-                    {new Date(msg.createdAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                  {msg.senderType === 'admin' && (
-                    <div className="flex items-center gap-1 mt-1 text-blue-100">
-                      <FaCheckDouble size={12} />
-                      {msg.readAt && <span>read</span>}
+                  <div
+                    className={`max-w-[78%] rounded-2xl px-4 py-2.5 shadow-sm lg:max-w-[58%] ${
+                      adminMessage
+                        ? 'rounded-br-md bg-green-600 text-white'
+                        : 'rounded-bl-md border border-gray-200 bg-white text-gray-800'
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap break-words text-sm leading-6">{content}</p>
+                    <div
+                      className={`mt-1 flex items-center justify-end gap-1 text-[11px] ${
+                        adminMessage ? 'text-green-50' : 'text-gray-400'
+                      }`}
+                    >
+                      {msg.createdAt && (
+                        <span>
+                          {new Date(msg.createdAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      )}
+                      {adminMessage && <FaCheckDouble size={11} />}
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
         )}
       </div>
 
       {/* Message Input */}
-      <form
-        onSubmit={handleSendMessage}
-        className="p-4 border-t border-gray-200 bg-white"
-      >
-        <div className="flex items-end gap-3">
-          <button
-            type="button"
-            className="p-2 hover:bg-gray-100 rounded-lg text-gray-700 flex-shrink-0"
-          >
-            <FaPaperclip size={18} />
-          </button>
-
+      <form onSubmit={handleSendMessage} className="border-t border-gray-200 bg-white p-4">
+        <div className="flex items-center gap-3">
           <div className="flex-1 relative">
             <input
               type="text"
@@ -286,23 +297,17 @@ const ChatWindow = ({ chat, onBack, onRefresh }) => {
               onChange={(e) => setMessageText(e.target.value)}
               placeholder="Type a message..."
               disabled={isLoading}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-full border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
           <button
-            type="button"
-            className="p-2 hover:bg-gray-100 rounded-lg text-gray-700 flex-shrink-0"
-          >
-            <FaSmile size={18} />
-          </button>
-
-          <button
             type="submit"
             disabled={isLoading || !messageText.trim()}
-            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg font-medium transition flex-shrink-0"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-green-600 text-white transition hover:bg-green-700 disabled:bg-gray-300 cursor-pointer"
+            aria-label="Send message"
           >
-            Send
+            <FaPaperPlane />
           </button>
         </div>
       </form>

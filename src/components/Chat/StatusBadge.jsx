@@ -1,7 +1,7 @@
 const StatusBadge = ({ status, priority, size = 'sm' }) => {
   const statusColors = {
     open: 'bg-blue-100 text-blue-800 border-blue-300',
-    'in-progress': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+    in_progress: 'bg-yellow-100 text-yellow-800 border-yellow-300',
     resolved: 'bg-green-100 text-green-800 border-green-300',
     closed: 'bg-gray-100 text-gray-800 border-gray-300',
     escalated: 'bg-red-100 text-red-800 border-red-300',
@@ -28,7 +28,7 @@ const StatusBadge = ({ status, priority, size = 'sm' }) => {
         } ${sizeClasses[size]}`}
       >
         <span className="w-2 h-2 rounded-full mr-2 bg-current opacity-70"></span>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {status.replace('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())}
       </span>
     );
   }

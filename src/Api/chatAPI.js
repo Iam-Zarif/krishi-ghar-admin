@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { Api } from './Api';
 
-const API_BASE_URL = 'https://ecommerce-client-backend-1.onrender.com/api/v1';
+const API_BASE_URL = `${Api}/api/v1`;
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');
@@ -15,10 +16,10 @@ export const chatAPI = {
   // Get all chats with filters
   getAllChats: (filters = {}) => {
     const params = new URLSearchParams();
-    if (filters.status) params.append('status', filters.status);
-    if (filters.priority) params.append('priority', filters.priority);
-    if (filters.category) params.append('category', filters.category);
-    if (filters.userType) params.append('userType', filters.userType);
+    if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+    if (filters.priority && filters.priority !== 'all') params.append('priority', filters.priority);
+    if (filters.category && filters.category !== 'all') params.append('category', filters.category);
+    if (filters.userType && filters.userType !== 'all') params.append('userType', filters.userType);
     if (filters.search) params.append('search', filters.search);
 
     return axios.get(`${API_BASE_URL}/chats/admin-chats?${params}`, {
@@ -37,8 +38,9 @@ export const chatAPI = {
 
   // Get chat messages
   getChatMessages: (chatId, limit = 50, skip = 0) => {
+    const page = Math.floor(skip / limit) + 1;
     return axios.get(
-      `${API_BASE_URL}/chats/messages/${chatId}?limit=${limit}&skip=${skip}`,
+      `${API_BASE_URL}/chats/messages/${chatId}?limit=${limit}&page=${page}`,
       {
         headers: getAuthHeader(),
         withCredentials: true,
