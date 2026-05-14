@@ -1,4 +1,5 @@
-export const Api = "https://ecommerce-client-backend-1.onrender.com";
+export const Api =
+  import.meta.env.VITE_API_URL || "https://ecommerce-client-backend-1.onrender.com";
 
 // https://ecommerce-backend-client.vercel.app
 // http://localhost:4000

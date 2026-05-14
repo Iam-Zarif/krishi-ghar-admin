@@ -5,14 +5,15 @@ import { FaSort } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import {
   approveAdminProduct,
-  fetchAdminSellPosts,
   fetchAdminProductDetails,
   fetchAdminProductsByStatus,
+  fetchAdminSupersalerProducts,
   rejectAdminProduct,
 } from "../../api/productModeration";
 import { getSavedProductsUi, saveProductsUi } from "../../utils/adminSession";
 
-const ROLE_TABS = [
+const OWNER_TABS = [
+  { key: "all", label: "সব" },
   { key: "producer", label: "প্রডিউসার" },
   { key: "supersaler", label: "সুপার-সেলার" },
   { key: "wholesaler", label: "হোলসেলার" },
@@ -20,8 +21,8 @@ const ROLE_TABS = [
 
 const STATUS_TABS = [
   { key: "all", label: "সব পণ্য" },
-  { key: "pending", label: "অপেক্ষমাণ" },
   { key: "approved", label: "অনুমোদিত" },
+  { key: "pending", label: "অপেক্ষমাণ" },
   { key: "rejected", label: "বাতিল" },
 ];
 
@@ -206,9 +207,6 @@ const ProductDetailsModal = ({ product, loading, onClose, onApprove, onReject, a
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={product.safeStatus} />
-              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">
-                {ROLE_TABS.find((tab) => tab.key === product.ownerRole)?.label || product.ownerRole}
-              </span>
             </div>
           </div>
 
@@ -251,30 +249,6 @@ const ProductDetailsModal = ({ product, loading, onClose, onApprove, onReject, a
                   <p className="text-sm text-gray-500">সেল পোস্ট</p>
                   <p className="mt-2 text-lg font-semibold text-gray-800">{product.safeSellPost ? "হ্যাঁ" : "না"}</p>
                 </div>
-                {product.ownerRole === "sell-post" && (
-                  <>
-                    <div className="rounded-lg bg-gray-50 p-4">
-                      <p className="text-sm text-gray-500">বিক্রয় ধরন</p>
-                      <p className="mt-2 text-lg font-semibold capitalize text-gray-800">{product.sellType}</p>
-                    </div>
-                    <div className="rounded-lg bg-gray-50 p-4">
-                      <p className="text-sm text-gray-500">অবশিষ্ট</p>
-                      <p className="mt-2 text-lg font-semibold text-gray-800">
-                        {product.remainingQuantity ?? 0} {product.unit || ""}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-gray-50 p-4">
-                      <p className="text-sm text-gray-500">কমিশন</p>
-                      <p className="mt-2 text-lg font-semibold text-gray-800">
-                        {product.commissionPercent || 0}% / {formatMoney(product.totalCommission)}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-gray-50 p-4">
-                      <p className="text-sm text-gray-500">দৃশ্যমানতা</p>
-                      <p className="mt-2 text-lg font-semibold capitalize text-gray-800">{product.visibility}</p>
-                    </div>
-                  </>
-                )}
               </div>
 
               <div className="rounded-lg bg-gray-50 p-4">
@@ -305,7 +279,6 @@ const ProductDetailsModal = ({ product, loading, onClose, onApprove, onReject, a
                 </div>
               </div>
 
-              {product.ownerRole !== "sell-post" && (
               <div className="flex flex-wrap justify-end gap-3">
                 {product.safeStatus !== "approved" && (
                   <button
@@ -328,7 +301,6 @@ const ProductDetailsModal = ({ product, loading, onClose, onApprove, onReject, a
                   </button>
                 )}
               </div>
-              )}
             </div>
           </div>
         </div>
@@ -346,7 +318,6 @@ const Products = () => {
     approved: [],
     rejected: [],
   });
-  const [sellPosts, setSellPosts] = useState([]);
   const [search, setSearch] = useState(savedUi.search);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOption, setSortOption] = useState(savedUi.sort);
@@ -354,7 +325,7 @@ const Products = () => {
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  const [activeRole, setActiveRole] = useState(savedUi.role);
+  const [activeOwner, setActiveOwner] = useState("all");
   const [activeStatus, setActiveStatus] = useState(savedUi.status);
   const [detailsProduct, setDetailsProduct] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -363,7 +334,6 @@ const Products = () => {
   const [confirmState, setConfirmState] = useState(null);
   const dropdownRef = useRef(null);
   const itemsPerPage = 10;
-  const canModerateProducts = true;
 
   const loadProducts = async () => {
     if (!token) {
@@ -383,14 +353,6 @@ const Products = () => {
       ]);
 
       setStatusBuckets({ all, pending, approved, rejected });
-
-      try {
-        const nextSellPosts = await fetchAdminSellPosts({ token });
-        setSellPosts(nextSellPosts);
-      } catch (sellPostError) {
-        console.warn("Admin sell posts could not be loaded", sellPostError);
-        setSellPosts([]);
-      }
     } catch (requestError) {
       const message =
         requestError?.response?.data?.message ||
@@ -421,22 +383,19 @@ const Products = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, sortOption, activeRole, activeStatus]);
+  }, [search, sortOption, activeOwner, activeStatus]);
 
 
 
   useEffect(() => {
     saveProductsUi({
-      role: activeRole,
       status: activeStatus,
       sort: sortOption,
       search,
     });
-  }, [activeRole, activeStatus, search, sortOption]);
+  }, [activeStatus, search, sortOption]);
 
-  const shouldShowStatusTabs = activeRole === "producer";
-  const activeStatusProducts =
-    statusBuckets[shouldShowStatusTabs ? activeStatus : "all"] || [];
+  const activeStatusProducts = activeOwner === "all" ? statusBuckets[activeStatus] || [] : [];
 
   const statusCounts = useMemo(
     () =>
@@ -447,24 +406,19 @@ const Products = () => {
     [statusBuckets],
   );
 
-  const roleCounts = useMemo(
-    () =>
-      ROLE_TABS.reduce((acc, tab) => {
-        acc[tab.key] =
-          tab.key === "sell-post"
-            ? sellPosts.length
-            : activeStatusProducts.filter((product) => product.ownerRole === tab.key).length;
-        return acc;
-      }, {}),
-    [activeStatusProducts, sellPosts],
+  const ownerCounts = useMemo(
+    () => ({
+      all: statusBuckets[activeStatus]?.length || 0,
+      producer: 0,
+      supersaler: 0,
+      wholesaler: 0,
+    }),
+    [activeStatus, statusBuckets],
   );
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
-    let next =
-      activeRole === "sell-post"
-        ? sellPosts
-        : activeStatusProducts.filter((product) => product.ownerRole === activeRole);
+    let next = activeStatusProducts;
 
     if (query) {
       next = next.filter((product) => {
@@ -505,7 +459,7 @@ const Products = () => {
     }
 
     return sorted;
-  }, [activeRole, activeStatusProducts, search, sellPosts, sortOption]);
+  }, [activeStatusProducts, search, sortOption]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
   const paginatedItems = filteredProducts.slice(
@@ -539,14 +493,6 @@ const Products = () => {
   };
 
   const handleOpenDetails = async (productId) => {
-    if (activeRole === "sell-post") {
-      const selectedPost = sellPosts.find((post) => post._id === productId);
-      setDetailsProduct(selectedPost || null);
-      setDetailsOpen(true);
-      setOpenDropdownId(null);
-      return;
-    }
-
     try {
       setDetailsOpen(true);
       setDetailsLoading(true);
@@ -608,6 +554,24 @@ const Products = () => {
     setConfirmState(null);
   };
 
+  const handleOwnerTabChange = async (owner) => {
+    setActiveOwner(owner);
+
+    if (owner !== "supersaler" || !token) {
+      return;
+    }
+
+    try {
+      const response = await fetchAdminSupersalerProducts({ token });
+      console.log("admin view-supersaler-product response", response);
+    } catch (requestError) {
+      console.error(
+        "admin view-supersaler-product failed",
+        requestError?.response?.data || requestError,
+      );
+    }
+  };
+
   return (
     <div className="w-full p-6 text-gray-800">
       <ToastContainer />
@@ -655,7 +619,7 @@ const Products = () => {
                 type="text"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder={`${ROLE_TABS.find((tab) => tab.key === activeRole)?.label || "পণ্য"} খুঁজুন`}
+                placeholder="পণ্য খুঁজুন"
                 className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-10 text-gray-700 shadow-sm focus:outline-green-500"
               />
               <BsSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -700,47 +664,39 @@ const Products = () => {
 
       <div className="mt-4 rounded-lg bg-white p-4 shadow-md">
         <div className="flex flex-wrap gap-3">
-          {ROLE_TABS.map((tab) => (
+          {OWNER_TABS.map((tab) => (
             <button
               key={tab.key}
               type="button"
-              onClick={() => setActiveRole(tab.key)}
+              onClick={() => handleOwnerTabChange(tab.key)}
               className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
-                activeRole === tab.key
+                activeOwner === tab.key
                   ? "bg-green-500 text-white"
                   : "bg-gray-300 text-gray-800 hover:bg-gray-200"
               } cursor-pointer`}
             >
-              {tab.label} ({roleCounts[tab.key] || 0})
+              {tab.label} ({ownerCounts[tab.key] || 0})
             </button>
           ))}
         </div>
       </div>
 
-      <div
-        className={`grid transition-all duration-300 ease-out ${
-          shouldShowStatusTabs
-            ? "mt-5 grid-rows-[1fr] opacity-100"
-            : "mt-0 grid-rows-[0fr] opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="overflow-hidden">
-          <div className="flex flex-wrap gap-3 rounded-lg bg-white p-4 shadow-md">
-            {STATUS_TABS.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveStatus(tab.key)}
-                className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
-                  activeStatus === tab.key
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-300 text-gray-800 hover:bg-gray-200"
-                } cursor-pointer`}
-              >
-                {tab.label} ({statusCounts[tab.key] || 0})
-              </button>
-            ))}
-          </div>
+      <div className="mt-5">
+        <div className="flex flex-wrap gap-3 rounded-lg bg-white p-4 shadow-md">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveStatus(tab.key)}
+              className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
+                activeStatus === tab.key
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-300 text-gray-800 hover:bg-gray-200"
+              } cursor-pointer`}
+            >
+              {tab.label} ({activeOwner === "all" ? statusCounts[tab.key] || 0 : 0})
+            </button>
+          ))}
         </div>
       </div>
 
@@ -764,15 +720,7 @@ const Products = () => {
         </div>
       ) : paginatedItems.length === 0 ? (
         <div className="mt-6">
-          <EmptyState
-            label={
-              shouldShowStatusTabs
-                ? activeStatus === "all"
-                  ? activeRole
-                  : `${activeStatus} ${activeRole}`
-                : activeRole
-            }
-          />
+          <EmptyState label="পণ্য" />
         </div>
       ) : (
         <div className="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md">
@@ -846,7 +794,7 @@ const Products = () => {
                         >
                           বিস্তারিত
                         </button>
-                        {canModerateProducts && product.safeStatus !== "approved" && (
+                        {product.safeStatus !== "approved" && (
                           <button
                             type="button"
                             onClick={() => handleApprove(product._id)}
@@ -855,7 +803,7 @@ const Products = () => {
                             অনুমোদন
                           </button>
                         )}
-                        {canModerateProducts && product.safeStatus !== "rejected" && (
+                        {product.safeStatus !== "rejected" && (
                           <button
                             type="button"
                             onClick={() => requestRejectConfirmation(product)}
@@ -890,7 +838,7 @@ const Products = () => {
                   </div>
                 </div>
 
-                {canModerateProducts && product.safeStatus === "pending" && (
+                {product.safeStatus === "pending" && (
                   <div className="mt-3 lg:hidden">
                     <InlineActionButtons
                       product={product}
@@ -915,14 +863,12 @@ const Products = () => {
               </div>
 
               <div className="hidden items-center justify-between gap-3 lg:flex">
-                {canModerateProducts && (
-                  <InlineActionButtons
-                    product={product}
-                    onApprove={handleApprove}
-                    onReject={() => requestRejectConfirmation(product)}
-                    actionLoading={actionLoadingId}
-                  />
-                )}
+                <InlineActionButtons
+                  product={product}
+                  onApprove={handleApprove}
+                  onReject={() => requestRejectConfirmation(product)}
+                  actionLoading={actionLoadingId}
+                />
 
                 <div
                   className="relative ml-auto"
@@ -943,7 +889,7 @@ const Products = () => {
                       >
                       বিস্তারিত
                       </button>
-                      {canModerateProducts && product.safeStatus !== "approved" && (
+                      {product.safeStatus !== "approved" && (
                         <button
                           type="button"
                           onClick={() => handleApprove(product._id)}
@@ -952,7 +898,7 @@ const Products = () => {
                           অনুমোদন
                         </button>
                       )}
-                      {canModerateProducts && product.safeStatus !== "rejected" && (
+                      {product.safeStatus !== "rejected" && (
                         <button
                           type="button"
                           onClick={() => requestRejectConfirmation(product)}

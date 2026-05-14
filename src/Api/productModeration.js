@@ -50,39 +50,6 @@ export const normalizeAdminProduct = (product = {}) => {
   };
 };
 
-export const normalizeAdminSellPost = (post = {}) => {
-  const product = post.product || {};
-  const seller = post.seller || {};
-  const producer = post.producer || {};
-
-  return {
-    ...post,
-    _id: post._id,
-    ownerRole: "sell-post",
-    ownerInfo: seller,
-    producerInfo: producer,
-    safeName: String(product.productName || post.productName || "Sell post").trim(),
-    safePrice: priceNumber(post.sellingPricePerKg),
-    safeQuantity: `${post.quantity || 0} ${post.unit || ""}`.trim(),
-    safeImage: resolveImage(product.image),
-    secondaryImages: Array.isArray(product.secondaryImages)
-      ? product.secondaryImages.map(resolveImage)
-      : [],
-    safeCategory: post.sellType || "sell post",
-    safeStatus: post.isActive === false ? "inactive" : "active",
-    safeSellPost: true,
-    description: `Visibility: ${post.visibility || "N/A"}`,
-    basePricePerKg: post.basePricePerKg,
-    sellingPricePerKg: post.sellingPricePerKg,
-    commissionPercent: post.commissionPercent,
-    totalCommission: post.totalCommission,
-    remainingQuantity: post.remainingQuantity,
-    soldQuantity: post.soldQuantity,
-    visibility: post.visibility,
-    sellType: post.sellType,
-  };
-};
-
 const getProductsFromResponse = (data) =>
   Array.isArray(data?.products) ? data.products.map(normalizeAdminProduct) : [];
 
@@ -129,9 +96,10 @@ export const rejectAdminProduct = async ({ token, productId }) => {
   return normalizeAdminProduct(response.data?.product || {});
 };
 
-export const fetchAdminSellPosts = async ({ token }) => {
-  const response = await axios.get(`${Api}/api/v1/admin/sell-posts`, buildConfig(token));
-  return Array.isArray(response.data?.posts)
-    ? response.data.posts.map(normalizeAdminSellPost)
-    : [];
+export const fetchAdminSupersalerProducts = async ({ token }) => {
+  const response = await axios.get(
+    `${Api}/api/v1/admin/view-supersaler-product`,
+    buildConfig(token),
+  );
+  return response.data;
 };

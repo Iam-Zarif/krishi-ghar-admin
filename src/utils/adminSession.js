@@ -30,7 +30,6 @@ export const saveDashboardPath = (path) => {
 export const getSavedProductsUi = () => {
   if (typeof window === "undefined") {
     return {
-      role: "producer",
       status: "all",
       sort: "Newest-Oldest",
       search: "",
@@ -40,14 +39,12 @@ export const getSavedProductsUi = () => {
   try {
     const parsed = JSON.parse(localStorage.getItem(ADMIN_PRODUCTS_UI_KEY) || "{}");
     return {
-      role: parsed.role || "producer",
       status: parsed.status || "all",
       sort: parsed.sort || "Newest-Oldest",
       search: parsed.search || "",
     };
   } catch {
     return {
-      role: "producer",
       status: "all",
       sort: "Newest-Oldest",
       search: "",

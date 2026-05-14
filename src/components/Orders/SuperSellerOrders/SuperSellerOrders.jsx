@@ -1,289 +1,200 @@
-import { FaRegSmile } from "react-icons/fa";
-import OrdersTable from "../../../hooks/OrdersTable/OrdersTable";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import {
+  fetchSupersalerOrderedProductsByAdmin,
+  updateSupersalerOrderStatusByAdmin,
+} from "../../../Api/adminOrders";
+import SuperSellerOrderDetailsModal from "./SuperSellerOrderDetailsModal";
+import SuperSellerOrdersPagination from "./SuperSellerOrdersPagination";
+import SuperSellerOrdersTable from "./SuperSellerOrdersTable";
+import SuperSellerOrdersToolbar from "./SuperSellerOrdersToolbar";
+import {
+  matchesQuery,
+  rowsPerPage,
+  sortOrders,
+} from "./supersellerOrderHelpers";
 
 const SuperSellerOrders = () => {
-  const superSellerOrdersData = [
-    {
-      sn: "01",
-      trackingNo: "#S2345",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "200",
-      totalEarning: "20,000 TK",
-      orderDate: "01/02/2024",
-      status: "Done",
-    },
-    {
-      sn: "02",
-      trackingNo: "#S2326",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "150",
-      totalEarning: "15,000 TK",
-      orderDate: "01/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "03",
-      trackingNo: "#S2365",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "300",
-      totalEarning: "30,000 TK",
-      orderDate: "01/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "04",
-      trackingNo: "#S2346",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "400",
-      totalEarning: "40,000 TK",
-      orderDate: "02/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "05",
-      trackingNo: "#S2347",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "250",
-      totalEarning: "25,000 TK",
-      orderDate: "02/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "06",
-      trackingNo: "#S2348",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "500",
-      totalEarning: "50,000 TK",
-      orderDate: "02/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "07",
-      trackingNo: "#S2349",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "100",
-      totalEarning: "10,000 TK",
-      orderDate: "03/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "08",
-      trackingNo: "#S2350",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "300",
-      totalEarning: "30,000 TK",
-      orderDate: "03/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "09",
-      trackingNo: "#S2351",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "150",
-      totalEarning: "15,000 TK",
-      orderDate: "03/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "10",
-      trackingNo: "#S2352",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "250",
-      totalEarning: "25,000 TK",
-      orderDate: "04/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "11",
-      trackingNo: "#S2353",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "400",
-      totalEarning: "40,000 TK",
-      orderDate: "04/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "12",
-      trackingNo: "#S2354",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "350",
-      totalEarning: "35,000 TK",
-      orderDate: "04/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "13",
-      trackingNo: "#S2355",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "500",
-      totalEarning: "50,000 TK",
-      orderDate: "05/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "14",
-      trackingNo: "#S2356",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "200",
-      totalEarning: "20,000 TK",
-      orderDate: "05/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "15",
-      trackingNo: "#S2357",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "100",
-      totalEarning: "10,000 TK",
-      orderDate: "05/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "16",
-      trackingNo: "#S2358",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "300",
-      totalEarning: "30,000 TK",
-      orderDate: "06/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "17",
-      trackingNo: "#S2359",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "600",
-      totalEarning: "60,000 TK",
-      orderDate: "06/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "18",
-      trackingNo: "#S2360",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "450",
-      totalEarning: "45,000 TK",
-      orderDate: "06/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "19",
-      trackingNo: "#S2361",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "600",
-      totalEarning: "60,000 TK",
-      orderDate: "07/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "20",
-      trackingNo: "#S2362",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "100",
-      totalEarning: "10,000 TK",
-      orderDate: "07/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "21",
-      trackingNo: "#S2363",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "200",
-      totalEarning: "20,000 TK",
-      orderDate: "07/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "22",
-      trackingNo: "#S2364",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "500",
-      totalEarning: "50,000 TK",
-      orderDate: "08/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "23",
-      trackingNo: "#S2365",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "250",
-      totalEarning: "25,000 TK",
-      orderDate: "08/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "24",
-      trackingNo: "#S2366",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "300",
-      totalEarning: "30,000 TK",
-      orderDate: "08/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "25",
-      trackingNo: "#S2367",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "350",
-      totalEarning: "35,000 TK",
-      orderDate: "09/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "26",
-      trackingNo: "#S2368",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "500",
-      totalEarning: "50,000 TK",
-      orderDate: "09/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "27",
-      trackingNo: "#S2369",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "400",
-      totalEarning: "40,000 TK",
-      orderDate: "09/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "28",
-      trackingNo: "#S2370",
-      productName: "SuperSeller Rice/বিশ্বস্ত ধান",
-      quantity: "200",
-      totalEarning: "20,000 TK",
-      orderDate: "10/02/2025",
-      status: "Done",
-    },
-    {
-      sn: "29",
-      trackingNo: "#S2371",
-      productName: "SuperSeller Jute/বিশ্বস্ত পাঁট",
-      quantity: "150",
-      totalEarning: "15,000 TK",
-      orderDate: "10/02/2025",
-      status: "Pending",
-    },
-    {
-      sn: "30",
-      trackingNo: "#S2372",
-      productName: "SuperSeller Corn/বিশ্বস্ত ভুট্টা",
-      quantity: "250",
-      totalEarning: "25,000 TK",
-      orderDate: "10/02/2025",
-      status: "Done",
-    },
-  ];
+  const token = localStorage.getItem("token");
+  const [orders, setOrders] = useState([]);
+  const [search, setSearch] = useState("");
+  const [sortOption, setSortOption] = useState("latest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [openMenuId, setOpenMenuId] = useState("");
+  const [detailsOrder, setDetailsOrder] = useState(null);
+  const [updatingId, setUpdatingId] = useState("");
+  const menuRef = useRef(null);
+  const loadedTokenRef = useRef("");
+  const lastErrorToastRef = useRef("");
 
+  const loadOrders = async () => {
+    if (!token) {
+      setError("অননুমোদিত প্রবেশ");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      const response = await fetchSupersalerOrderedProductsByAdmin({ token });
+      console.log("admin supersaler ordered products response", response);
+      setOrders(Array.isArray(response?.orders) ? response.orders : []);
+    } catch (requestError) {
+      const message =
+        requestError?.response?.data?.message ||
+        requestError?.message ||
+        "সুপার সেলার অর্ডার লোড করা যায়নি";
+      setError(message);
+      if (lastErrorToastRef.current !== message) {
+        toast.error(message);
+        lastErrorToastRef.current = message;
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (loadedTokenRef.current === token) return;
+    loadedTokenRef.current = token;
+    loadOrders();
+  }, [token]);
+
+  useEffect(() => {
+    const onOutsideClick = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId("");
+      }
+    };
+
+    document.addEventListener("mousedown", onOutsideClick);
+    return () => document.removeEventListener("mousedown", onOutsideClick);
+  }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortOption]);
+
+  const filteredOrders = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return sortOrders(
+      orders.filter((order) => matchesQuery(order, query)),
+      sortOption,
+    );
+  }, [orders, search, sortOption]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / rowsPerPage));
+  const currentOrders = filteredOrders.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage,
+  );
+
+  const handleMenuToggle = (orderId) => {
+    setOpenMenuId((current) => (current === orderId ? "" : orderId));
+  };
+
+  const handleOpenDetails = (order) => {
+    setDetailsOrder(order);
+    setOpenMenuId("");
+  };
+
+  const handleStatusUpdate = async (order, status) => {
+    const _id = order?._id;
+    if (!_id || !token) return;
+
+    try {
+      setUpdatingId(_id);
+
+      const response = await updateSupersalerOrderStatusByAdmin({
+        token,
+        _id,
+        status,
+      });
+
+      console.log("admin supersaler order status update response", response);
+      toast.success("অর্ডার স্ট্যাটাস আপডেট হয়েছে");
+
+      setOrders((current) =>
+        current.map((item) =>
+          item._id === _id
+            ? {
+                ...item,
+                adminActionStatus: status,
+                orderStatus: response?.order?.orderStatus || status,
+                paymentStatus:
+                  response?.order?.paymentStatus || item.paymentStatus,
+              }
+            : item,
+        ),
+      );
+
+      setOpenMenuId("");
+    } catch (requestError) {
+      toast.error(
+        requestError?.response?.data?.message ||
+          requestError?.message ||
+          "স্ট্যাটাস আপডেট করা যায়নি",
+      );
+    } finally {
+      setUpdatingId("");
+    }
+  };
 
   return (
-    <div>
-      <div className="flex items-center justify-between px-4">
-        <div className="text-lg mt-4 font-semibold text-gray-700 flex items-center">
-          <FaRegSmile className="mr-2 text-green-500" /> Super Seller Orders
+    <div className="w-full p-6 text-gray-800">
+      <ToastContainer />
+
+      <SuperSellerOrdersToolbar
+        count={filteredOrders.length}
+        loading={loading}
+        onRefresh={loadOrders}
+        search={search}
+        onSearchChange={setSearch}
+        sortOption={sortOption}
+        onSortChange={setSortOption}
+      />
+
+      {loading ? (
+        <div className="mt-6 rounded-lg bg-white p-8 text-center text-gray-500 shadow-md">
+          সুপার সেলার অর্ডার লোড হচ্ছে...
         </div>
-      </div>
-      <OrdersTable data={superSellerOrdersData} />
+      ) : error ? (
+        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">
+          {error}
+        </div>
+      ) : currentOrders.length === 0 ? (
+        <div className="mt-6 rounded-lg border border-dashed border-gray-300 bg-white p-12 text-center text-gray-500 shadow-sm">
+          কোনো সুপার সেলার অর্ডার পাওয়া যায়নি।
+        </div>
+      ) : (
+        <SuperSellerOrdersTable
+          currentPage={currentPage}
+          menuRef={menuRef}
+          onMenuToggle={handleMenuToggle}
+          onOpenDetails={handleOpenDetails}
+          onStatusUpdate={handleStatusUpdate}
+          openMenuId={openMenuId}
+          orders={currentOrders}
+          rowsPerPage={rowsPerPage}
+          updatingId={updatingId}
+        />
+      )}
+
+      {!loading && !error && (
+        <SuperSellerOrdersPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
+
+      <SuperSellerOrderDetailsModal
+        order={detailsOrder}
+        onClose={() => setDetailsOrder(null)}
+      />
     </div>
   );
 };
