@@ -101,47 +101,69 @@ const SuperSellerOrders = () => {
     setOpenMenuId("");
   };
 
-  const handleStatusUpdate = async (order, status) => {
-    const _id = order?._id;
-    if (!_id || !token) return;
+const handleStatusUpdate = async (order, status) => {
+  const _id = order?._id;
 
-    try {
-      setUpdatingId(_id);
+  console.log("========== UI CLICK DEBUG ==========");
+  console.log("Clicked order full object:", order);
+  console.log("Clicked order._id:", _id);
+  console.log("Clicked UI status:", status);
+  console.log("Token exists in component:", Boolean(token));
+  console.log("===================================");
 
-      const response = await updateSupersalerOrderStatusByAdmin({
-        token,
-        _id,
-        status,
-      });
+  if (!_id || !token) {
+    console.log("UPDATE STOPPED BEFORE API CALL:", {
+      hasOrderId: Boolean(_id),
+      hasToken: Boolean(token),
+      _id,
+      status,
+    });
+    return;
+  }
 
-      console.log("admin supersaler order status update response", response);
-      toast.success("অর্ডার স্ট্যাটাস আপডেট হয়েছে");
+  try {
+    setUpdatingId(_id);
 
-      setOrders((current) =>
-        current.map((item) =>
-          item._id === _id
-            ? {
-                ...item,
-                adminActionStatus: status,
-                orderStatus: response?.order?.orderStatus || status,
-                paymentStatus:
-                  response?.order?.paymentStatus || item.paymentStatus,
-              }
-            : item,
-        ),
-      );
+    const response = await updateSupersalerOrderStatusByAdmin({
+      token,
+      _id,
+      status,
+    });
 
-      setOpenMenuId("");
-    } catch (requestError) {
-      toast.error(
-        requestError?.response?.data?.message ||
-          requestError?.message ||
-          "স্ট্যাটাস আপডেট করা যায়নি",
-      );
-    } finally {
-      setUpdatingId("");
-    }
-  };
+    console.log("admin supersaler order status update response", response);
+    toast.success("অর্ডার স্ট্যাটাস আপডেট হয়েছে");
+
+    setOrders((current) =>
+      current.map((item) =>
+        item._id === _id
+          ? {
+              ...item,
+              orderStatus: response?.order?.orderStatus || item.orderStatus,
+              paymentStatus:
+                response?.order?.paymentStatus || item.paymentStatus,
+            }
+          : item,
+      ),
+    );
+
+    setOpenMenuId("");
+  } catch (requestError) {
+    console.log("========== COMPONENT CATCH ERROR ==========");
+    console.log("Error full:", requestError);
+    console.log("Error message:", requestError?.message);
+    console.log("Error response status:", requestError?.response?.status);
+    console.log("Error response data:", requestError?.response?.data);
+    console.log("=========================================");
+
+    toast.error(
+      requestError?.response?.data?.message ||
+        requestError?.message ||
+        "স্ট্যাটাস আপডেট করা যায়নি",
+    );
+  } finally {
+    setUpdatingId("");
+  }
+};
 
   return (
     <div className="w-full p-6 text-gray-800">
