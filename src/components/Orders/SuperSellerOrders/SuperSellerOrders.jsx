@@ -40,7 +40,6 @@ const SuperSellerOrders = () => {
       setLoading(true);
       setError("");
       const response = await fetchSupersalerOrderedProductsByAdmin({ token });
-      console.log("admin supersaler ordered products response", response);
       setOrders(Array.isArray(response?.orders) ? response.orders : []);
     } catch (requestError) {
       const message =
@@ -101,69 +100,44 @@ const SuperSellerOrders = () => {
     setOpenMenuId("");
   };
 
-const handleStatusUpdate = async (order, status) => {
-  const _id = order?._id;
+  const handleStatusUpdate = async (order, status) => {
+    const orderId = order?._id;
+    if (!orderId || !token) return;
 
-  console.log("========== UI CLICK DEBUG ==========");
-  console.log("Clicked order full object:", order);
-  console.log("Clicked order._id:", _id);
-  console.log("Clicked UI status:", status);
-  console.log("Token exists in component:", Boolean(token));
-  console.log("===================================");
+    try {
+      setUpdatingId(orderId);
 
-  if (!_id || !token) {
-    console.log("UPDATE STOPPED BEFORE API CALL:", {
-      hasOrderId: Boolean(_id),
-      hasToken: Boolean(token),
-      _id,
-      status,
-    });
-    return;
-  }
+      const response = await updateSupersalerOrderStatusByAdmin({
+        token,
+        orderId,
+        status,
+      });
 
-  try {
-    setUpdatingId(_id);
+      toast.success("অর্ডার স্ট্যাটাস আপডেট হয়েছে");
+      setOrders((current) =>
+        current.map((item) =>
+          item._id === orderId
+            ? {
+                ...item,
+                orderStatus: response?.order?.orderStatus || item.orderStatus,
+                paymentStatus:
+                  response?.order?.paymentStatus || item.paymentStatus,
+              }
+            : item,
+        ),
+      );
 
-    const response = await updateSupersalerOrderStatusByAdmin({
-      token,
-      _id,
-      status,
-    });
-
-    console.log("admin supersaler order status update response", response);
-    toast.success("অর্ডার স্ট্যাটাস আপডেট হয়েছে");
-
-    setOrders((current) =>
-      current.map((item) =>
-        item._id === _id
-          ? {
-              ...item,
-              orderStatus: response?.order?.orderStatus || item.orderStatus,
-              paymentStatus:
-                response?.order?.paymentStatus || item.paymentStatus,
-            }
-          : item,
-      ),
-    );
-
-    setOpenMenuId("");
-  } catch (requestError) {
-    console.log("========== COMPONENT CATCH ERROR ==========");
-    console.log("Error full:", requestError);
-    console.log("Error message:", requestError?.message);
-    console.log("Error response status:", requestError?.response?.status);
-    console.log("Error response data:", requestError?.response?.data);
-    console.log("=========================================");
-
-    toast.error(
-      requestError?.response?.data?.message ||
-        requestError?.message ||
-        "স্ট্যাটাস আপডেট করা যায়নি",
-    );
-  } finally {
-    setUpdatingId("");
-  }
-};
+      setOpenMenuId("");
+    } catch (requestError) {
+      toast.error(
+        requestError?.response?.data?.message ||
+          requestError?.message ||
+          "স্ট্যাটাস আপডেট করা যায়নি",
+      );
+    } finally {
+      setUpdatingId("");
+    }
+  };
 
   return (
     <div className="w-full p-6 text-gray-800">
