@@ -1,6 +1,9 @@
-export const STATUS_OPTIONS = [
+import { Api } from "../../../Api/Api";
+
+export const STATUS_TABS = [
   { value: "pending", label: "Pending" },
-  { value: "purchased", label: "Purchased" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
 ];
 
 export const SORT_OPTIONS = [
@@ -8,8 +11,7 @@ export const SORT_OPTIONS = [
   { value: "oldest", label: "Oldest to newest" },
   { value: "amount-high", label: "Amount high to low" },
   { value: "amount-low", label: "Amount low to high" },
-  { value: "pending-first", label: "Status - pending first" },
-  { value: "purchased-first", label: "Status - purchased first" },
+  { value: "name", label: "Product name A-Z" },
 ];
 
 export const rowsPerPage = 10;
@@ -29,114 +31,78 @@ export const formatDate = (value) => {
   });
 };
 
-export const normalizeStatus = (order) =>
-  String(
-    order?.adminActionStatus ||
-      order?.orderStatus ||
-      order?.status ||
-      "pending",
-  ).toLowerCase();
+export const resolveProductImage = (value) => {
+  const image = String(value || "").trim();
+  if (!image) return "https://placehold.co/80x80?text=No+Image";
+  if (/^https?:\/\//i.test(image)) return image;
+  return `${Api}/${image.replace(/^\/+/, "")}`;
+};
+
+export const productOwner = (product) => product?.producer || {};
+
+export const normalizeStatus = (product) =>
+  String(product?.status || "pending").toLowerCase();
 
 export const statusClassName = (status) => {
   const value = String(status || "").toLowerCase();
 
-  if (value === "purchased" || value === "delivered" || value === "paid") {
+  if (value === "approved") {
     return "bg-green-100 text-green-700";
   }
 
-  if (value === "cancelled" || value === "rejected") {
+  if (value === "rejected") {
     return "bg-red-100 text-red-700";
   }
 
   return "bg-yellow-100 text-yellow-700";
 };
 
-export const productFromItem = (item) =>
-  item?.productId && typeof item.productId === "object" ? item.productId : {};
-
-export const getProductNames = (items) =>
-  (Array.isArray(items) ? items : [])
-    .map((item) => {
-      const product = productFromItem(item);
-      return item?.productName || product?.productName || "নামহীন পণ্য";
-    })
-    .join(", ");
-
-export const getProductImage = (items) => {
-  const firstItem = Array.isArray(items) ? items[0] : null;
-  const product = productFromItem(firstItem);
-
-  return (
-    firstItem?.productImage ||
-    product?.image ||
-    "https://placehold.co/80x80?text=No+Image"
-  );
-};
-
-export const getQuantityLabel = (items) =>
-  (Array.isArray(items) ? items : [])
-    .map((item) => {
-      const product = productFromItem(item);
-      const unit = product?.unit || item?.unit || "";
-      return `${item?.quantity || 0}${unit ? ` ${unit}` : ""}`;
-    })
-    .join(", ");
-
-export const matchesQuery = (order, query) => {
+export const matchesQuery = (product, query) => {
   if (!query) return true;
 
-  const buyer = order?.userId || {};
+  const owner = productOwner(product);
   const values = [
-    order?._id,
-    order?.orderId,
-    normalizeStatus(order),
-    buyer?.name,
-    buyer?.phone,
-    buyer?.district,
-    buyer?.thana,
-    getProductNames(order?.items),
+    product?._id,
+    product?.productName,
+    product?.status,
+    product?.category?.name,
+    typeof product?.category === "string" ? product.category : "",
+    owner?.name,
+    owner?.phone,
+    owner?.district,
+    owner?.thana,
   ];
 
   return values.filter(Boolean).join(" ").toLowerCase().includes(query);
 };
 
-const orderAmount = (order) => Number(order?.totalAmount || order?.subtotal || 0);
+const productAmount = (product) => Number(product?.price || 0);
 
-const orderTime = (order) => {
-  const timestamp = new Date(order?.createdAt || 0).getTime();
+const productTime = (product) => {
+  const timestamp = new Date(product?.createdAt || product?.updatedAt || 0).getTime();
   return Number.isNaN(timestamp) ? 0 : timestamp;
 };
 
-export const sortOrders = (orders, sortOption) => {
-  const nextOrders = [...orders];
+export const sortProducts = (products, sortOption) => {
+  const nextProducts = [...products];
 
   if (sortOption === "oldest") {
-    return nextOrders.sort((first, second) => orderTime(first) - orderTime(second));
+    return nextProducts.sort((first, second) => productTime(first) - productTime(second));
   }
 
   if (sortOption === "amount-high") {
-    return nextOrders.sort((first, second) => orderAmount(second) - orderAmount(first));
+    return nextProducts.sort((first, second) => productAmount(second) - productAmount(first));
   }
 
   if (sortOption === "amount-low") {
-    return nextOrders.sort((first, second) => orderAmount(first) - orderAmount(second));
+    return nextProducts.sort((first, second) => productAmount(first) - productAmount(second));
   }
 
-  if (sortOption === "pending-first") {
-    return nextOrders.sort((first, second) => {
-      const firstPending = normalizeStatus(first) === "pending" ? 0 : 1;
-      const secondPending = normalizeStatus(second) === "pending" ? 0 : 1;
-      return firstPending - secondPending || orderTime(second) - orderTime(first);
-    });
+  if (sortOption === "name") {
+    return nextProducts.sort((first, second) =>
+      String(first?.productName || "").localeCompare(String(second?.productName || "")),
+    );
   }
 
-  if (sortOption === "purchased-first") {
-    return nextOrders.sort((first, second) => {
-      const firstPurchased = normalizeStatus(first) === "purchased" ? 0 : 1;
-      const secondPurchased = normalizeStatus(second) === "purchased" ? 0 : 1;
-      return firstPurchased - secondPurchased || orderTime(second) - orderTime(first);
-    });
-  }
-
-  return nextOrders.sort((first, second) => orderTime(second) - orderTime(first));
+  return nextProducts.sort((first, second) => productTime(second) - productTime(first));
 };

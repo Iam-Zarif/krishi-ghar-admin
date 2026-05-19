@@ -18,6 +18,7 @@ import {
 import { MdOutlineMessage } from "react-icons/md";
 import { IoCheckmarkDoneCircle } from "react-icons/io5";
 import { toast, ToastContainer } from "react-toastify";
+import { getSerialNumber } from "../../utils/adminTable";
 
 const WholeSalers = () => {
   const token = localStorage.getItem("token");
@@ -409,7 +410,13 @@ const handleDelete = async () => {
                     onChange={() => handleCheckboxChange(w.id)}
                   />
                 </td>
-                <td>{index + 1}</td>
+                <td>
+                  {getSerialNumber({
+                    currentPage,
+                    rowsPerPage: wholesalersPerPage,
+                    index,
+                  })}
+                </td>
                 <td className="p-3">
                   <img
                     src={w.image || blankUser}

@@ -5,18 +5,25 @@ import { Api } from "../../Api/Api";
 
 export const AuthContext = createContext();
 
+const clearStoredSession = () => {
+  localStorage.removeItem("token");
+  Cookies.remove("token");
+  Cookies.remove("session");
+  delete axios.defaults.headers.common["Authorization"];
+};
+
 // eslint-disable-next-line react/prop-types
 const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        console.error("No token found");
+        setProfile(null);
         setLoading(false);
         return;
       }
@@ -26,12 +33,24 @@ const AuthProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
-        setProfile(response.data?.admin || response.data);
+        const adminProfile = response.data?.admin || response.data;
+        if (!adminProfile?._id && !adminProfile?.id) {
+          clearStoredSession();
+          setProfile(null);
+          setError("Profile not found");
+          return;
+        }
+        setProfile(adminProfile);
+        setError(null);
       } catch (err) {
         console.error(
           "Error fetching profile:",
           err.response?.data || err.message
         );
+        if ([401, 403, 404].includes(err.response?.status)) {
+          clearStoredSession();
+        }
+        setProfile(null);
         setError(err.response?.data?.message || "Failed to fetch profile");
       } finally {
         setLoading(false);
@@ -55,9 +74,7 @@ const AuthProvider = ({ children }) => {
           withCredentials: true,
         },
       );
-      localStorage.removeItem("token");
-      Cookies.remove("token");
-      Cookies.remove("session");
+      clearStoredSession();
       window.location.href = "/auth/login";
       setProfile(null);
       console.log("Logout successful");

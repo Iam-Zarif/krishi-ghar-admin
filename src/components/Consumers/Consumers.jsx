@@ -6,6 +6,7 @@ import { Api } from "../../Api/Api";
 import { FaArrowDown, FaArrowUp, FaEnvelope, FaMapMarkerAlt, FaPhone, FaSort, FaSortAlphaDown, FaSortAlphaUp } from "react-icons/fa";
 import { MdOutlineMessage } from "react-icons/md";
 import { toast, ToastContainer } from "react-toastify";
+import { getSerialNumber, paginateRows } from "../../utils/adminTable";
 
 const blankUser = "/photos/common/user.png";
 
@@ -62,6 +63,11 @@ const Consumers = () => {
   );
 
   const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
+  const paginatedCustomers = paginateRows(
+    filteredCustomers,
+    currentPage,
+    customersPerPage
+  );
 
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
@@ -305,7 +311,7 @@ const Consumers = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredCustomers?.map((customer, index) => (
+            {paginatedCustomers?.map((customer, index) => (
               <tr
                 key={customer?._id}
                 className={`hover:bg-gray-200 border cursor-pointer border-gray-400 border-x-0 transition-all`}
@@ -367,7 +373,13 @@ const Consumers = () => {
                     className="w-4 h-4"
                   />
                 </td>
-                <td className="text-center">{index + 1}</td>
+                <td className="text-center">
+                  {getSerialNumber({
+                    currentPage,
+                    rowsPerPage: customersPerPage,
+                    index,
+                  })}
+                </td>
                 <td className="p-3">
                   <img
                     src={customer?.image || blankUser}

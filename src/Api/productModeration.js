@@ -19,6 +19,8 @@ const priceNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const isMongoId = (value = "") => /^[a-f\d]{24}$/i.test(String(value).trim());
+
 const resolveImage = (value) => {
   if (!value) {
     return "https://placehold.co/640x480?text=No+Image";
@@ -42,7 +44,11 @@ export const normalizeAdminProduct = (product = {}) => {
       ? product.secondaryImages.map(resolveImage)
       : [],
     safeCategory:
-      product?.category?.name || product?.categoryName || product?.category || "Uncategorized",
+      product?.category?.name ||
+      product?.categoryName ||
+      (typeof product?.category === "string" && !isMongoId(product.category)
+        ? product.category
+        : "Uncategorized"),
     safeStatus: String(product?.status || "pending").toLowerCase(),
     safeSellPost:
       String(product?.addToSellPost || "").toLowerCase() === "yes" ||
@@ -98,7 +104,7 @@ export const rejectAdminProduct = async ({ token, productId }) => {
 
 export const fetchAdminSupersalerProducts = async ({ token }) => {
   const response = await axios.get(
-    `${Api}/api/v1/admin/view-supersaler-product`,
+    `${Api}/api/v1/admin/supersaler-products/approved`,
     buildConfig(token),
   );
   return response.data;

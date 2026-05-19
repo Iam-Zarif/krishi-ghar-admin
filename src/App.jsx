@@ -22,7 +22,7 @@ function App() {
       return;
     }
 
-    if (!token && !isAuthRoute) {
+    if ((!token || !profile) && !isAuthRoute) {
       navigate("/auth/login", { replace: true });
     }
   }, [isAuthRoute, loading, navigate, profile, token]);

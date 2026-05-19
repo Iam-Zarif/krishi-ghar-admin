@@ -26,6 +26,7 @@ const AllProducersTable = ({
   actions,
   selectedProducers,
   index,
+  serialNumber,
   removeProducer,
 }) => {
   const [DeleteConfirmation, setDeleteConfirmation] = useState(false);
@@ -129,7 +130,7 @@ const AllProducersTable = ({
                 className="w-4 h-4"
               />
             </td>
-            <td className="text-center">{index + 1}</td>
+            <td className="text-center">{serialNumber || index + 1}</td>
             <td className="lg:lg:p-3 p-2">
               <img
                 src={producer.image || blankUser}
@@ -261,7 +262,7 @@ const AllProducersTable = ({
                 className="w-4 h-4"
               />
             </td>
-            <td className="lg:text-center">{index + 1}</td>
+            <td className="lg:text-center">{serialNumber || index + 1}</td>
             <td className="lg:p-3 py-1.5">
               <img
                 src={producer.image || blankUser}

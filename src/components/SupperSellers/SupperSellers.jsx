@@ -7,6 +7,7 @@ import { RxCross1 } from "react-icons/rx";
 import axios from "axios";
 import { Api } from "../../Api/Api";
 import { toast, ToastContainer } from "react-toastify";
+import { getSerialNumber } from "../../utils/adminTable";
 
 const blankUser = "/photos/common/user.png";
 
@@ -444,7 +445,13 @@ const removeSeller = (sellerId) => {
                     className="w-4 h-4"
                   />
                 </td>
-                <td className="p-3">{index + 1}</td>
+                <td className="p-3">
+                  {getSerialNumber({
+                    currentPage,
+                    rowsPerPage: sellersPerPage,
+                    index,
+                  })}
+                </td>
                 <td className="p-3">
                   <img
                     src={seller?.image || blankUser}

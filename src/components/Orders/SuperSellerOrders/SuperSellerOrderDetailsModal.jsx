@@ -1,10 +1,9 @@
 import {
   formatDate,
   formatMoney,
-  getProductImage,
-  getProductNames,
-  getQuantityLabel,
   normalizeStatus,
+  productOwner,
+  resolveProductImage,
   statusClassName,
 } from "./supersellerOrderHelpers";
 
@@ -15,11 +14,15 @@ const DetailRow = ({ label, value }) => (
   </div>
 );
 
-const SuperSellerOrderDetailsModal = ({ order, onClose }) => {
-  if (!order) return null;
+const SuperSellerOrderDetailsModal = ({ product, onClose }) => {
+  if (!product) return null;
 
-  const buyer = order.userId || {};
-  const status = normalizeStatus(order);
+  const owner = productOwner(product);
+  const status = normalizeStatus(product);
+  const category =
+    product?.category?.name ||
+    product?.categoryName ||
+    (typeof product?.category === "string" ? product.category : "");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -27,9 +30,9 @@ const SuperSellerOrderDetailsModal = ({ order, onClose }) => {
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-800">
-              Supersaler Order Details
+              Supersaler Product Details
             </h3>
-            <p className="mt-1 text-xs text-gray-500">{order.orderId || order._id}</p>
+            <p className="mt-1 text-xs text-gray-500">{product._id}</p>
           </div>
           <button
             type="button"
@@ -43,16 +46,16 @@ const SuperSellerOrderDetailsModal = ({ order, onClose }) => {
         <div className="px-6 py-5">
           <div className="flex flex-col gap-4 rounded-lg border border-gray-100 bg-gray-50 p-4 sm:flex-row sm:items-center">
             <img
-              src={getProductImage(order.items)}
-              alt={getProductNames(order.items)}
+              src={resolveProductImage(product.image)}
+              alt={product.productName || "Product"}
               className="h-20 w-20 rounded-lg border border-gray-200 object-cover"
             />
             <div>
               <p className="font-semibold text-gray-800">
-                {getProductNames(order.items)}
+                {product.productName || "Unnamed product"}
               </p>
               <p className="mt-1 text-sm text-gray-500">
-                Quantity: {getQuantityLabel(order.items)}
+                Quantity: {product.quantity || 0} {product.unit || "unit"}
               </p>
               <span
                 className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClassName(status)}`}
@@ -63,20 +66,28 @@ const SuperSellerOrderDetailsModal = ({ order, onClose }) => {
           </div>
 
           <div className="mt-5">
-            <DetailRow label="Supersaler" value={buyer.name} />
-            <DetailRow label="Phone" value={buyer.phone} />
+            <DetailRow label="Supersaler" value={owner.name} />
+            <DetailRow label="Phone" value={owner.phone} />
             <DetailRow
               label="Location"
-              value={[buyer.district, buyer.thana].filter(Boolean).join(", ")}
+              value={[owner.district, owner.thana].filter(Boolean).join(", ")}
             />
-            <DetailRow label="Role" value={buyer.role} />
-            <DetailRow
-              label="Total"
-              value={formatMoney(order.totalAmount || order.subtotal)}
-            />
-            <DetailRow label="Order date" value={formatDate(order.createdAt)} />
-            <DetailRow label="Order ID" value={order._id} />
+            <DetailRow label="Category" value={category} />
+            <DetailRow label="Price" value={formatMoney(product.price)} />
+            <DetailRow label="Add to sell post" value={product.addToSellPost} />
+            <DetailRow label="Created" value={formatDate(product.createdAt)} />
+            <DetailRow label="Approved at" value={formatDate(product.approvedAt)} />
+            <DetailRow label="Product ID" value={product._id} />
           </div>
+
+          {product.description ? (
+            <div className="mt-5">
+              <p className="text-sm font-semibold text-gray-500">Description</p>
+              <p className="mt-2 max-h-40 overflow-y-auto rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
+                {product.description}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

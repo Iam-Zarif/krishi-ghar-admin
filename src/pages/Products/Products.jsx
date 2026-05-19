@@ -563,10 +563,10 @@ const Products = () => {
 
     try {
       const response = await fetchAdminSupersalerProducts({ token });
-      console.log("admin view-supersaler-product response", response);
+      console.log("admin supersaler approved products response", response);
     } catch (requestError) {
       console.error(
-        "admin view-supersaler-product failed",
+        "admin supersaler approved products failed",
         requestError?.response?.data || requestError,
       );
     }

@@ -7,6 +7,7 @@ import { BsSearch } from "react-icons/bs";
 import Pagination from "../../hooks/Pagination/Pagination";
 import { RxCross1 } from "react-icons/rx";
 import { FaArrowDown, FaArrowUp, FaSort, FaSortAlphaDown, FaSortAlphaUp } from "react-icons/fa";
+import { getSerialNumber } from "../../utils/adminTable";
 
 
 const Producers = () => {
@@ -463,6 +464,14 @@ const handleAcceptUser = async (producerId) => {
                   removeProducer={removeProducer}
                   selectedProducers={selectedProducers}
                   index={index}
+                  serialNumber={getSerialNumber({
+                    currentPage:
+                      activeTab === "Existing Producers"
+                        ? existedProducerCurrentPage
+                        : accountRequestedCurrentPage,
+                    rowsPerPage: itemsPerPage,
+                    index,
+                  })}
                   existedProducers={paginatedExistedProducers}
                   accountRequest={paginatedAccountRequestProducers}
                   approving={
